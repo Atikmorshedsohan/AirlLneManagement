@@ -1,0 +1,101 @@
+<!-- Admin Dashboard Section -->
+<div id="dashboard-container" class="container" style="display: none;">
+    <h1>Welcome, Admin</h1>
+
+    <!-- Navigation Menu -->
+    <nav class="nav">
+        <ul>
+            <li><button onclick="showSection('passenger-details')">Passenger Details</button></li>
+            <li><button onclick="showSection('manage-flights')">Manage Flights</button></li>
+            <li><button onclick="logout()">Logout</button></li>
+        </ul>
+    </nav>
+
+    <!-- Passenger Details Section -->
+    <section id="passenger-details" class="content-section" style="display: none;">
+        <h2>Passenger Details</h2>
+        <div id="passenger-details-box">
+            <p>No passenger details available at the moment.</p>
+        </div>
+    </section>
+
+    <!-- Manage Flights Section -->
+    <section id="manage-flights" class="content-section" style="display: none;">
+        <h2>Manage Flights</h2>
+        <form id="add-flight-form">
+            <div class="form-group">
+                <label for="flight-number">Flight Number:</label>
+                <input type="text" id="flight-number" name="flightNumber" placeholder="Enter Flight Number" required>
+            </div>
+            <div class="form-group">
+                <label for="departure-time">Departure Time:</label>
+                <input type="datetime-local" id="departure-time" name="departureTime" required>
+            </div>
+            <div class="form-group">
+                <label for="arrival-time">Arrival Time:</label>
+                <input type="datetime-local" id="arrival-time" name="arrivalTime" required>
+            </div>
+            <div class="form-group">
+                <label for="destination">Destination:</label>
+                <input type="text" id="destination" name="destination" placeholder="Enter Destination" required>
+            </div>
+            <button type="submit">Add Flight</button>
+        </form>
+    </section>
+
+    <div class="footer">
+        <p>Admin Dashboard © 2024</p>
+    </div>
+</div>
+
+<script>
+    // Placeholder for login form handling - ensure login-container exists in your full HTML
+    document.getElementById("login-form")?.addEventListener("submit", function (e) {
+        e.preventDefault(); // Prevent form submission
+
+        // Validate credentials (placeholder logic)
+        const email = document.getElementById("email").value;
+        const password = document.getElementById("password").value;
+        const adminId = document.getElementById("adminId").value;
+
+        if (email && password && adminId) {
+            document.getElementById("login-container").style.display = "none"; // Hide login form
+            document.getElementById("dashboard-container").style.display = "block"; // Show dashboard
+        } else {
+            alert("Please fill in all fields!");
+        }
+    });
+
+    // Show specific dashboard section
+    function showSection(sectionId) {
+        const sections = document.querySelectorAll('.content-section');
+        sections.forEach(section => {
+            section.style.display = section.id === sectionId ? "block" : "none";
+        });
+    }
+
+    // Logout functionality
+    function logout() {
+        if (confirm("Are you sure you want to logout?")) {
+            document.getElementById("login-container").style.display = "block"; // Show login form
+            document.getElementById("dashboard-container").style.display = "none"; // Hide dashboard
+        }
+    }
+
+    // Handle flight addition
+    document.getElementById("add-flight-form").addEventListener("submit", function (e) {
+        e.preventDefault();
+        const flightNumber = document.getElementById("flight-number").value;
+        const departureTime = document.getElementById("departure-time").value;
+        const arrivalTime = document.getElementById("arrival-time").value;
+        const destination = document.getElementById("destination").value;
+
+        if (flightNumber && departureTime && arrivalTime && destination) {
+            alert("Flight has been added successfully!");
+            // Optionally, clear the form
+            this.reset();
+        } else {
+            alert("Please fill in all fields to add a flight.");
+        }
+    });
+</script>

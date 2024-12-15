@@ -1,0 +1,41 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Buy Ticket - Bangladesh Airline</title>
+
+    <!-- Link static CSS files -->
+     <link rel="stylesheet" href="{% static 'css/login.css' %}">
+    <link rel="stylesheet" href="{% static 'css/BuyTicket.css' %}">
+    <link rel="stylesheet" href="{% static 'css/passenger_css.css' %}">
+
+</head>
+<body class="bg">
+    <div class="container">
+        <h3>Buy Your Ticket</h3>
+        <form action="{% url 'buy_ticket' %}" method="post">
+            {% csrf_token %}
+            <div class="form-group">
+                <label for="destination">Destination:</label>
+                <input type="text" id="destination" name="destination" required placeholder="Enter destination">
+            </div>
+            <div class="form-group">
+                <label for="departure-date">Departure Date:</label>
+                <input type="date" id="departure-date" name="departure-date" required>
+            </div>
+            <div class="form-group">
+                <label for="return-date">Return Date:</label>
+                <input type="date" id="return-date" name="return-date">
+            </div>
+            <div class="form-group">
+                <label for="num-passengers">Number of Passengers:</label>
+                <input type="number" id="num-passengers" name="num-passengers" required min="1" max="10">
+            </div>
+            <button type="submit" id="buy-ticket-button">Buy Ticket</button>
+            <button type="button" id="back-button" onclick="window.history.back()">Back</button>
+        </form>
+    </div>
+</body>
+</html>

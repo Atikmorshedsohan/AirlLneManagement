@@ -1,0 +1,12 @@
+.button {
+    background: linear-gradient(45deg, #46c4ab, #3b4040); /* Gradient effect */
+    color: white; /* White text */
+    border: none; /* Remove border */
+    border-radius: 25px; /* Rounded edges */
+    padding: 10px 20px; /* Add padding */
+    font-size: 16px; /* Increase font size */
+    cursor: pointer; /* Add a pointer cursor */
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2); /* Add shadow */
+    transition: all 0.3s ease; /* Smooth transition */
+  }
+  
