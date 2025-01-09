@@ -7,12 +7,109 @@
     <title>Buy Ticket - Bangladesh Airline</title>
 
     <!-- Link static CSS files -->
-     <link rel="stylesheet" href="{% static 'css/login.css' %}">
-    <link rel="stylesheet" href="{% static 'css/BuyTicket.css' %}">
-    <link rel="stylesheet" href="{% static 'css/passenger_css.css' %}">
+    <link rel="stylesheet" href="{% static 'css/login.css' %}">
+    <style>
+        /* Additional Styles for Form Design */
+        body {
+            font-family: Arial, sans-serif;
+            background-color: rgb(235, 238, 235);
+            background-image: url('{% static "picture/Bg photo.jpg" %}');
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+        }
 
+        .container {
+            background-color: #ffffff;
+            border-radius: 8px;
+            padding: 30px;
+            width: 90%;
+            max-width: 500px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+            text-align: center;
+        }
+
+        h3 {
+            color: #10457d;
+            font-size: 1.8rem;
+            margin-bottom: 20px;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+            text-align: left;
+        }
+
+        .form-group label {
+            display: block;
+            font-size: 1rem;
+            margin-bottom: 5px;
+            color: #333;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 10px;
+            font-size: 1rem;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+
+        .form-group input:focus {
+            border-color: #10457d;
+            outline: none;
+            box-shadow: 0 0 5px rgba(16, 69, 125, 0.5);
+        }
+
+        button {
+            padding: 10px 20px;
+            font-size: 1rem;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 10px 5px;
+            transition: background-color 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        #buy-ticket-button {
+            background-color: #10457d;
+            color: white;
+        }
+
+        #buy-ticket-button:hover {
+            background-color: #0c3c6b;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        }
+
+        #back-button {
+            background-color: #ddd;
+            color: #333;
+        }
+
+        #back-button:hover {
+            background-color: #bbb;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                width: 100%;
+                padding: 20px;
+            }
+
+            button {
+                width: 100%;
+            }
+        }
+    </style>
 </head>
-<body class="bg">
+<body>
     <div class="container">
         <h3>Buy Your Ticket</h3>
         <form action="{% url 'buy_ticket' %}" method="post">

@@ -1,12 +1,160 @@
-.button {
-    background: linear-gradient(45deg, #46c4ab, #3b4040); /* Gradient effect */
-    color: white; /* White text */
-    border: none; /* Remove border */
-    border-radius: 25px; /* Rounded edges */
-    padding: 10px 20px; /* Add padding */
-    font-size: 16px; /* Increase font size */
-    cursor: pointer; /* Add a pointer cursor */
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2); /* Add shadow */
-    transition: all 0.3s ease; /* Smooth transition */
+/* General Styles */
+body {
+  font-family: Arial, sans-serif;
+  background-image: url('/static/picture/Bg%20photo.jpg'); /* Ensure correct path */
+  background-size: cover;
+  background-position: center;
+  margin: 0;
+  padding: 0;
+  color: #ffffff; /* Default text color for contrast */
+  line-height: 1.6; /* Adjusted for better spacing */
+}
+
+/* Navbar */
+.navbar {
+  width: 100%;
+  background: linear-gradient(90deg, #10457d, #00735c);
+  color: #ffffff;
+  padding: 0.8rem 1rem; /* Reduced padding for smaller screens */
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.logo-section {
+  display: flex;
+  align-items: center;
+}
+
+.logo {
+  height: 40px; /* Adjusted size */
+  width: 40px;
+}
+
+.company-name {
+  font-size: 1.5rem; /* Adjusted font size */
+  font-weight: bold;
+  color: #ffffff;
+  text-transform: uppercase;
+  margin-left: 10px; /* Reduced margin */
+}
+
+.nav-links {
+  display: flex;
+  gap: 15px; /* Reduced spacing between links */
+}
+
+.nav-link {
+  font-size: 1rem; /* Smaller font size */
+  color: #ffffff;
+  text-decoration: none;
+  padding: 6px 12px; /* Reduced padding for clickable area */
+  border-radius: 5px;
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+.nav-link:hover,
+.nav-link.active {
+  background-color: #46c4ab;
+  color: #ffffff;
+}
+
+/* Welcome Section */
+.container.text-center {
+  max-width: 500px; /* Adjusted width */
+  margin: 80px auto;
+  background: rgba(0, 0, 0, 0.6); /* Add semi-transparent dark background */
+  padding: 20px; /* Reduced padding */
+  border-radius: 8px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5);
+  text-align: center;
+}
+
+.container.text-center h2 {
+  font-size: 2rem; /* Reduced font size */
+  font-weight: bold;
+  color: #ffffff;
+  text-transform: uppercase;
+  margin-bottom: 10px;
+}
+
+.container.text-center p.lead {
+  font-size: 1rem; /* Smaller font size */
+  color: #ffffff;
+  margin-bottom: 0;
+}
+
+/* Info Section */
+.info-section {
+  background-color: rgba(0, 76, 70, 0.9); /* Transparent dark green */
+  color: white;
+  padding: 40px 0; /* Reduced padding */
+  text-align: center;
+}
+
+.info-card {
+  background-color: rgba(0, 115, 92, 0.85); /* Slightly transparent */
+  color: white;
+  padding: 15px; /* Reduced padding */
+  border-radius: 8px; /* Slightly smaller */
+  margin: 8px 0;
+  text-align: center;
+  transition: transform 0.3s ease, background-color 0.3s ease;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+}
+
+.info-card:hover {
+  background-color: rgba(0, 115, 92, 1); /* Fully opaque on hover */
+  transform: scale(1.05);
+}
+
+.info-card i {
+  font-size: 1.8rem; /* Smaller icon size */
+}
+
+.info-card h3 {
+  font-size: 1.4rem; /* Smaller header size */
+}
+
+.info-card p {
+  font-size: 0.9rem; /* Adjusted text size */
+}
+
+/* Footer */
+footer {
+  background-color: #004c46;
+  color: #ffffff;
+  padding: 10px 0; /* Reduced padding */
+  text-align: center;
+  font-size: 12px; /* Smaller font size */
+  box-shadow: 0 -2px 5px rgba(0, 0, 0, 0.1);
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .nav-links {
+    flex-direction: column;
+    gap: 10px;
+    text-align: center;
   }
-  
+
+  .navbar {
+    padding: 1rem;
+  }
+
+  .company-name {
+    font-size: 1.2rem;
+  }
+
+  .container {
+    width: 90%;
+  }
+
+  .info-card {
+    margin-bottom: 15px;
+  }
+}

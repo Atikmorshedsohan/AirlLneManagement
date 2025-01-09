@@ -1,0 +1,89 @@
+/* General Styles */
+body {
+    margin: 0;
+    padding: 0;
+    font-family: Arial, sans-serif;
+}
+
+/* Navbar */
+.navbar {
+    width: 100%;
+    background: linear-gradient(90deg, #10457d, #00735c); /* Stylish gradient */
+    color: #ffffff;
+    padding: 10px 20px; /* Adjusted padding */
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    position: sticky; /* Sticky header */
+    top: 0;
+    z-index: 1000;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3); /* Subtle shadow for depth */
+}
+
+/* Logo Section */
+.logo-section {
+    display: flex;
+    align-items: center;
+}
+
+.logo {
+    height: 40px;
+    width: 40px;
+    margin-right: 10px; /* Spacing between logo and text */
+}
+
+.company-name {
+    font-size: 1.8rem;
+    font-weight: bold;
+    text-transform: uppercase;
+    color: #ffffff;
+}
+
+/* Navigation Links */
+.nav-links {
+    display: flex;
+    gap: 20px; /* Space between links */
+}
+
+.nav-link {
+    font-size: 1rem;
+    color: #ffffff;
+    text-decoration: none;
+    padding: 8px 15px; /* Add padding for better click area */
+    border-radius: 5px;
+    transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+.nav-link:hover {
+    background-color: #46c4ab; /* Highlight effect */
+    color: #ffffff;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .navbar {
+        flex-direction: column; /* Stack navbar items on smaller screens */
+        align-items: flex-start;
+        padding: 15px;
+    }
+
+    .nav-links {
+        flex-direction: column;
+        gap: 10px; /* Reduced gap for stacked links */
+        width: 100%; /* Full width for links */
+    }
+
+    .nav-link {
+        text-align: left; /* Align links to the left */
+        width: 100%; /* Full width clickable area */
+    }
+
+    .company-name {
+        font-size: 1.5rem; /* Slightly smaller font size for small screens */
+    }
+
+    .logo {
+        height: 35px; /* Adjust logo size */
+        width: 35px;
+    }
+}

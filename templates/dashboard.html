@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Flight Dashboard</title>
+    <link rel="stylesheet" href="/static/css/dashboard.css">
+</head>
+
+<body>
+    <!-- Header Section -->
+    {% include 'header.html' %}
+
+    <div class="container">
+        <!-- Dashboard Title -->
+        <h1>Flight Dashboard</h1>
+
+        <!-- Flight Table -->
+        <table>
+            <thead>
+                <tr>
+                    <th>Flight Number</th>
+                    <th>Source Airport</th>
+                    <th>Destination Airport</th>
+                    <th>Date</th>
+                    <th>Time</th>
+                    <th>Available Seats</th>
+                    <th>Price (USD)</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                <!-- Dynamically populate flights -->
+                {% for flight in flights %}
+                    <tr>
+                        <td>{{ flight.flight_number }}</td>
+                        <td>{{ flight.source_airport.name }} ({{ flight.source_airport.code }})</td>
+                        <td>{{ flight.destination_airport.name }} ({{ flight.destination_airport.code }})</td>
+                        <td>{{ flight.date }}</td>
+                        <td>{{ flight.time }}</td>
+                        <td>{{ flight.available_seats }}</td>
+                        <td>${{ flight.price }}</td>
+                        <td>
+                            <!-- Link to Buy Ticket -->
+                            <a href="{% url 'buy_ticket' %}" class="buy-button">Buy Ticket</a>
+                        </td>
+                    </tr>
+                {% empty %}
+                    <tr>
+                        <td colspan="8">No flights available.</td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Footer Section -->
+    <footer>
+        <p>&copy; 2025 Flight Dashboard. All rights reserved.</p>
+    </footer>
+</body>
+
+</html>

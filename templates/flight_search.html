@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Flight Search</title>
+    <link rel="stylesheet" href="/static/css/search.css">
+</head>
+<body>
+    <div class="container">
+        <h1>Search Flights</h1>
+        <form id="searchForm">
+            {% csrf_token %}
+            <label for="from">From (Airport Code):</label>
+            <input type="text" id="from" name="from" required placeholder="Enter source airport code (e.g., JFK)">
+
+            <label for="to">To (Airport Code):</label>
+            <input type="text" id="to" name="to" required placeholder="Enter destination airport code (e.g., LAX)">
+
+            <label for="date">Date:</label>
+            <input type="date" id="date" name="date" required>
+
+            <button type="submit">Search</button>
+        </form>
+
+        <div id="results"></div>
+    </div>
+
+    <script>
+        document.getElementById("searchForm").addEventListener("submit", async (event) => {
+            event.preventDefault();
+
+            const from = document.getElementById("from").value.trim();
+            const to = document.getElementById("to").value.trim();
+            const date = document.getElementById("date").value;
+
+            const resultsDiv = document.getElementById("results");
+            resultsDiv.innerHTML = "Loading..."; // Show loading message
+
+            try {
+                const response = await fetch(`/search-flights/?from=${from}&to=${to}&date=${date}`);
+                const data = await response.json();
+
+                if (response.ok) {
+                    // Display the flight results
+                    resultsDiv.innerHTML = data.map(flight => `
+                        <div class="flight">
+                            <p><strong>Flight Number:</strong> ${flight.flight_number}</p>
+                            <p><strong>Source:</strong> ${flight.source}</p>
+                            <p><strong>Destination:</strong> ${flight.destination}</p>
+                            <p><strong>Date:</strong> ${flight.date}</p>
+                            <p><strong>Time:</strong> ${flight.time}</p>
+                            <p><strong>Available Seats:</strong> ${flight.available_seats}</p>
+                            <p><strong>Price:</strong> $${flight.price}</p>
+                        </div>
+                        <hr>
+                    `).join("");
+                } else {
+                    // Display error message
+                    resultsDiv.innerHTML = `<p class="error">${data.message || "No flights found."}</p>`;
+                }
+            } catch (error) {
+                resultsDiv.innerHTML = `<p class="error">An error occurred while searching for flights.</p>`;
+            }
+        });
+    </script>
+</body>
+</html>

@@ -8,11 +8,12 @@ body {
     padding: 0;
     color: #ffffff; /* Default text color for better contrast */
 }
+
 /* Centered Login Container */
 .container {
     max-width: 400px;
     margin: 100px auto;
-    padding: 20px;
+    padding: 33px;
     border-radius: 10px;
     box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5);
     background: rgba(0, 0, 0, 0.7); /* Transparent dark background for contrast */
@@ -29,7 +30,7 @@ h2 {
 
 /* Form Group */
 .form-group {
-    margin-bottom: 20px;
+    margin-bottom: 25px;
     text-align: left;
 }
 
@@ -42,10 +43,10 @@ label {
 }
 
 input {
-    width: 95%;
-    padding: 10px;
+    width: 100%;
+    padding: 8px;
     border: 1px solid #ddd;
-    border-radius: 50px;
+    border-radius: 5px;
     font-size: 16px;
     color: #000; /* Dark text for readability */
 }

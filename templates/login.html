@@ -1,38 +1,43 @@
-{% load static %}
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Welcome to Bangladesh Airline</title>
-
-    <!-- Link to your CSS files -->
-    <link rel="stylesheet" href="{% static 'color.css' %}">
-    <link rel="stylesheet" href="{% static 'passenger_css.css' %}">
-    <link rel="stylesheet" href="{% static 'css/buy_ticket.css' %}">
-    <link rel="stylesheet" href="../static/css/login.css">
-    <!-- Tailwind Cdn -->
-    <!-- <link href="https://cdn.jsdelivr.net/npm/daisyui@4.12.14/dist/full.min.css" rel="stylesheet" type="text/css" />
-    <script src="https://cdn.tailwindcss.com"></script> -->
-    
+    <title>Login - Airline Management</title>
+    <link rel="stylesheet" href="/static/css/login.css">
 </head>
+<body>
+    {% include "header.html" %}
+    <div class="container">
+        <h2>Login to Your Account</h2>
+        <form method="post" action="{% url 'login' %}">
+            {% csrf_token %}
+            <div class="form-group">
+                <label for="username">Username:</label>
+                <input type="text" id="username" name="username" placeholder="Enter your username" required>
+            </div>
+            <div class="form-group">
+                <label for="password">Password:</label>
+                <input type="password" id="password" name="password" placeholder="Enter your password" required>
+            </div>
 
-<body class="bg">
-    <div class="container text-sm text-black-400">
-        <h1>Welcome to Bangladesh Airline</h1>
-        <p>Your one-stop solution for managing flights, bookings, and passengers.</p>
+            <!-- Display error messages -->
+            {% if messages %}
+                <div>
+                    {% for message in messages %}
+                        <p style="color: red;">{{ message }}</p>
+                    {% endfor %}
+                </div>
+            {% endif %}
 
-        <div class="nav">
-           <!-- <button class="btn btn-accent">Admin</button> -->
-            <button class="btn">Admin</button>
-            <button class="btn">Passenger</button>
-        </div>
-
-        <div class="footer">
-            All rights reserved.
-        </div>
+            <div class="action-buttons">
+                <button type="submit" class="toggle-button">Login</button>
+                <a href="{% url 'register' %}" class="toggle-button">Sign Up</a>
+            </div>
+        </form>
+        <p>
+            <a href="{% url 'password_reset' %}">Forgot Password?</a>
+        </p>        
     </div>
 </body>
-
 </html>

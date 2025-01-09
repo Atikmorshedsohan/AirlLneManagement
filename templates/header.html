@@ -1,0 +1,18 @@
+{% load static %}
+<header class="navbar">
+    <link rel="stylesheet" href="{% static 'css/header.css' %}">
+    <div class="logo-section">
+        <img src="{% static 'picture/Plane_logo-modified.png' %}" alt="Bangladesh Airlines Logo" class="logo">
+        <span class="company-name">Bangladesh Airlines</span>
+    </div>
+    <nav class="nav-links">
+        <a href="{% url 'contact' %}" class="nav-link">Contact</a>
+        <a href="{% url 'search' %}" class="nav-link">Search</a>
+        <a href="#TravelInfo" class="nav-link">Travel Info</a>
+        <a href="#LatestNews" class="nav-link">Latest News</a>
+        <a href="{% url 'profile' %}" class="nav-link">Profile</a>
+        {% if user.is_authenticated %}
+          <a href="{% url 'logout' %}" class="nav-link">Logout</a>
+        {%endif%}
+    </nav>
+</header>

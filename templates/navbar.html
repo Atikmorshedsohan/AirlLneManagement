@@ -1,38 +1,72 @@
-{% load static %}
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Welcome to Bangladesh Airline</title>
-
-    <!-- Link to your CSS files -->
-    <link rel="stylesheet" href="{% static 'color.css' %}">
-    <link rel="stylesheet" href="{% static 'passenger_css.css' %}">
-    <link rel="stylesheet" href="{% static 'css/buy_ticket.css' %}">
-    <link rel="stylesheet" href="{% static 'css/login.css' %}">
-    <!-- Tailwind Cdn -->
-    <!-- <link href="https://cdn.jsdelivr.net/npm/daisyui@4.12.14/dist/full.min.css" rel="stylesheet" type="text/css" />
-    <script src="https://cdn.tailwindcss.com"></script> -->
+    <title>Bangladesh Airlines</title>
+    <link rel="stylesheet" href="/static/css/color.css">
+    <script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
 </head>
-
-<body class="bg">
-    <div class="container text-sm text-black-400">
-        <h1>Welcome to Bangladesh Airline</h1>
-        <p>Your one-stop solution for managing flights, bookings, and passengers.</p>
-
-        <div class="nav">
-            <!-- Admin button can be linked later -->
-            <button class="btn">Admin</button>
-            <!-- Passenger button -->
-            <a href="{% url 'passenger' %}" class="btn">Passenger</a>
+<body>
+    <!-- Navbar -->
+    <header class="navbar">
+        <div class="logo-section">
+            <img src="/static/picture/Plane_logo-modified.png" alt="Bangladesh Airlines Logo" class="logo" />
+            <span class="company-name">Bangladesh Airlines</span>
         </div>
+        <nav class="nav-links">
+            <a href="#home" class="nav-link">Home</a>
+            <a href="{% url 'about_us' %}" class="nav-link">About Us</a>
+            <a href="#services" class="nav-link">Services</a>
+            <a href="{% url 'contact' %}" class="nav-link">Contact</a>
+            {% if user.is_authenticated %}
+                <a href="{% url 'logout' %}" class="nav-link">Logout</a>
+            {% else %}
+                <a href="{% url 'login' %}" class="nav-link">Login</a>
+            {% endif %}
+        </nav>
+        
+    </header>
 
-        <div class="footer">
-            All rights reserved.
-        </div>
+    <!-- Welcome Section -->
+    <div class="container text-center my-5">
+        <h2>Welcome to Bangladesh Airlines</h2>
+        <p class="lead">Your one-stop solution for managing flights, bookings, and passengers.</p>
     </div>
-</body>
 
+    <!-- Flights Information Section -->
+    <section class="info-section py-5">
+        <div class="container text-center">
+            <h2 class="mb-4">Flight Information at a Glance</h2>
+            <div class="row">
+                <!-- Available Flights -->
+                <div class="info-card">
+                    <i class="fas fa-plane"></i>
+                    <h3>50</h3>
+                    <p>Available Flights</p>
+                </div>
+                <div class="info-card">
+                    <i class="fas fa-globe"></i>
+                    <h3>23</h3>
+                    <p>International Flights</p>
+                </div>
+                <div class="info-card">
+                    <i class="fas fa-map-marker-alt"></i>
+                    <h3>27</h3>
+                    <p>Domestic Flights</p>
+                </div>
+                <div class="info-card">
+                    <i class="fas fa-clock"></i>
+                    <h3>85%</h3>
+                    <p>Efficiency</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer>
+        <p>&copy; 2024 Bangladesh Airlines. All rights reserved.</p>
+    </footer>
+</body>
 </html>
