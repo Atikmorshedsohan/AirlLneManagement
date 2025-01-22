@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ticket Success</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f5f5f5;
+            margin: 0;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: #fff;
+            border-radius: 10px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+            padding: 20px;
+            text-align: center;
+        }
+
+        h2 {
+            color: #28a745;
+        }
+
+        .ticket-info {
+            text-align: left;
+            margin-top: 20px;
+            background: #f9f9f9;
+            padding: 15px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+
+        .button-container {
+            margin-top: 20px;
+        }
+
+        .button {
+            padding: 10px 20px;
+            background-color: #10457d;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            text-decoration: none;
+        }
+
+        .button:hover {
+            background-color: #0c3c6b;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2>Ticket Booking Successful!</h2>
+        <p>Thank you for booking with us. Here are your ticket details:</p>
+
+        <div class="ticket-info">
+            <p><strong>Flight:</strong> {{ flight.flight_number }}</p>
+            <p><strong>From:</strong> {{ flight.source_airport.name }} ({{ flight.source_airport.code }})</p>
+            <p><strong>To:</strong> {{ flight.destination_airport.name }} ({{ flight.destination_airport.code }})</p>
+            <p><strong>Departure Date:</strong> {{ flight.date }}</p>
+            <p><strong>Departure Time:</strong> {{ flight.time }}</p>
+            <p><strong>Number of Tickets:</strong> {{ num_tickets }}</p>
+        </div>
+
+        <h3>Seat Details:</h3>
+        <ul>
+            {% for ticket in tickets %}
+                <li><strong>Seat:</strong> {{ ticket.seat.seat_number }} | <strong>Class:</strong> {{ ticket.ticket_class }}</li>
+            {% endfor %}
+        </ul>
+
+        <div class="button-container">
+            <a href="{% url 'dashboard' %}" class="button">Book Another Ticket</a>
+        </div>
+    </div>
+</body>
+</html>

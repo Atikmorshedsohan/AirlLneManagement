@@ -1,44 +1,31 @@
-{% load static %}
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Buy Ticket - Bangladesh Airline</title>
-
-    <!-- Link static CSS files -->
-    <link rel="stylesheet" href="{% static 'css/login.css' %}">
     <style>
-        /* Additional Styles for Form Design */
         body {
             font-family: Arial, sans-serif;
-            background-color: rgb(235, 238, 235);
-            background-image: url('{% static "picture/Bg photo.jpg" %}');
-            background-size: cover;
-            background-position: center;
-            background-repeat: no-repeat;
+            background-color: #f5f5f5;
             margin: 0;
-            padding: 0;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            min-height: 100vh;
+            padding: 20px;
+            background-image: url(/static/picture/sky.jpg);
         }
 
         .container {
-            background-color: #ffffff;
-            border-radius: 8px;
-            padding: 30px;
-            width: 90%;
-            max-width: 500px;
+            max-width: 800px;
+            margin: 0 auto;
+            background: #fff;
+            border-radius: 10px;
             box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+            padding: 20px;
             text-align: center;
         }
 
         h3 {
-            color: #10457d;
-            font-size: 1.8rem;
             margin-bottom: 20px;
+            color: #333;
         }
 
         .form-group {
@@ -53,7 +40,8 @@
             color: #333;
         }
 
-        .form-group input {
+        .form-group input,
+        .form-group select {
             width: 100%;
             padding: 10px;
             font-size: 1rem;
@@ -61,78 +49,212 @@
             border-radius: 5px;
         }
 
-        .form-group input:focus {
+        .form-group input:focus,
+        .form-group select:focus {
             border-color: #10457d;
             outline: none;
             box-shadow: 0 0 5px rgba(16, 69, 125, 0.5);
         }
 
-        button {
-            padding: 10px 20px;
-            font-size: 1rem;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-            margin: 10px 5px;
-            transition: background-color 0.3s ease, box-shadow 0.3s ease;
+        .seating-chart {
+            display: grid;
+            grid-template-columns: repeat(4, 60px); /* 4 seats per row */
+            gap: 15px;
+            justify-content: center;
+            margin: 20px 0;
         }
 
-        #buy-ticket-button {
-            background-color: #10457d;
+        .seat {
+            width: 50px;
+            height: 50px;
+            border-radius: 5px;
+            border: 1px solid #ccc;
+            text-align: center;
+            line-height: 50px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        .seat.available {
+            background-color: #dff0d8;
+        }
+
+        .seat.sold {
+            background-color: #f2dede;
+            cursor: not-allowed;
+        }
+
+        .seat.selected {
+            background-color: #337ab7;
             color: white;
         }
 
-        #buy-ticket-button:hover {
+        .legend {
+            margin: 20px auto;
+            text-align: center;
+        }
+
+        .legend span {
+            display: inline-block;
+            margin: 0 15px;
+            text-align: center;
+        }
+
+        .legend .legend-box {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border-radius: 5px;
+            margin-right: 5px;
+        }
+
+        .legend .available-box {
+            background-color: #dff0d8;
+        }
+
+        .legend .sold-box {
+            background-color: #f2dede;
+        }
+
+        .legend .selected-box {
+            background-color: #337ab7;
+        }
+
+        .error-message {
+            color: red;
+            margin-bottom: 20px;
+        }
+
+        button {
+            padding: 10px 20px;
+            font-size: 16px;
+            background-color: #10457d;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            margin-top: 20px;
+        }
+
+        button:hover {
             background-color: #0c3c6b;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-        }
-
-        #back-button {
-            background-color: #ddd;
-            color: #333;
-        }
-
-        #back-button:hover {
-            background-color: #bbb;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-        }
-
-        @media (max-width: 768px) {
-            .container {
-                width: 100%;
-                padding: 20px;
-            }
-
-            button {
-                width: 100%;
-            }
         }
     </style>
 </head>
 <body>
     <div class="container">
         <h3>Buy Your Ticket</h3>
-        <form action="{% url 'buy_ticket' %}" method="post">
+
+        {% if error %}
+            <p class="error-message">{{ error }}</p>
+        {% endif %}
+
+        <form method="POST">
             {% csrf_token %}
+
+            <!-- Source Airport -->
             <div class="form-group">
-                <label for="destination">Destination:</label>
-                <input type="text" id="destination" name="destination" required placeholder="Enter destination">
+                <label for="source-airport">Source Airport:</label>
+                <select id="source-airport" name="source_airport" required>
+                    <option value="" disabled selected>Select Source Airport</option>
+                    {% for airport in airports %}
+                        <option value="{{ airport.id }}">{{ airport.name }} ({{ airport.code }})</option>
+                    {% endfor %}
+                </select>
             </div>
+
+            <!-- Destination Airport -->
+            <div class="form-group">
+                <label for="destination-airport">Destination Airport:</label>
+                <select id="destination-airport" name="destination_airport" required>
+                    <option value="" disabled selected>Select Destination Airport</option>
+                    {% for airport in airports %}
+                        <option value="{{ airport.id }}">{{ airport.name }} ({{ airport.code }})</option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <!-- Departure Date -->
             <div class="form-group">
                 <label for="departure-date">Departure Date:</label>
-                <input type="date" id="departure-date" name="departure-date" required>
+                <input type="date" id="departure-date" name="departure_date" required>
             </div>
+
+            <!-- Return Date -->
             <div class="form-group">
                 <label for="return-date">Return Date:</label>
-                <input type="date" id="return-date" name="return-date">
+                <input type="date" id="return-date" name="return_date">
             </div>
+
+            <!-- Number of Passengers -->
             <div class="form-group">
                 <label for="num-passengers">Number of Passengers:</label>
-                <input type="number" id="num-passengers" name="num-passengers" required min="1" max="10">
+                <input type="number" id="num-passengers" name="num_passengers" required min="1" max="10">
             </div>
-            <button type="submit" id="buy-ticket-button">Buy Ticket</button>
-            <button type="button" id="back-button" onclick="window.history.back()">Back</button>
+
+            <!-- Ticket Class -->
+            <div class="form-group">
+                <label for="ticket-class">Ticket Class:</label>
+                <select id="ticket-class" name="ticket_class" required>
+                    <option value="" disabled selected>Select Ticket Class</option>
+                    <option value="Economy">Economy</option>
+                    <option value="Business">Business</option>
+                    <option value="First">First</option>
+                </select>
+            </div>
+
+            <!-- Contact Email -->
+            <div class="form-group">
+                <label for="contact-email">Contact Email:</label>
+                <input type="email" id="contact-email" name="contact_email" required placeholder="Enter your email">
+            </div>
+
+            <!-- Contact Phone -->
+            <div class="form-group">
+                <label for="contact-phone">Contact Phone (optional):</label>
+                <input type="text" id="contact-phone" name="contact_phone" placeholder="Enter your phone number">
+            </div>
+
+            <!-- Seating Chart -->
+            <h4>Select Your Seats:</h4>
+            <div class="seating-chart">
+                {% for seat in seats %}
+                    <div 
+                        class="seat {% if seat.is_sold %}sold{% else %}available{% endif %}"
+                        data-seat="{{ seat.seat_number }}"
+                        onclick="selectSeat(this)"
+                    >
+                        {{ seat.seat_number }}
+                        <input
+                            type="checkbox"
+                            name="seats"
+                            value="{{ seat.seat_number }}"
+                            style="display: none;"
+                            {% if seat.is_sold %}disabled{% endif %}
+                        >
+                    </div>
+                {% endfor %}
+            </div>
+
+            <div class="legend">
+                <span><div class="legend-box available-box"></div> Available</span>
+                <span><div class="legend-box sold-box"></div> Sold</span>
+                <span><div class="legend-box selected-box"></div> Selected</span>
+            </div>
+
+            <button type="submit">Buy Ticket</button>
         </form>
     </div>
+
+    <script>
+        function selectSeat(seat) {
+            if (!seat.classList.contains('sold')) {
+                seat.classList.toggle('selected');
+                const checkbox = seat.querySelector('input[type="checkbox"]');
+                checkbox.checked = !checkbox.checked;
+            }
+        }
+    </script>
 </body>
 </html>

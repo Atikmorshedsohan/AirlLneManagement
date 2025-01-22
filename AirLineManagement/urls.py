@@ -1,5 +1,5 @@
 from django.contrib import admin
-from django.urls import path
+from django.urls import path, include
 from AirLine import views
 from django.contrib.auth import views as auth_views
 from AirLine.views import profile_view, CustomPasswordChangeView
@@ -28,5 +28,8 @@ urlpatterns = [
     path('contact/', views.contact, name='contact'),
     path('contact_success/',views.contact_success,name='contact_success.html'),
     path('about_us/', views.about_us, name='about_us'),
-    path('search/', views.search_flights, name='search'),
+    # path('search/', views.search_flights, name='search'),
+    # path('search-flights/', include('AirLine.urls')),
+    path('search-flights/', views.search_flights, name='search-flights'),
+    path('ticket/<int:flight_id>/<int:num_tickets>/success/', views.ticket_success, name='ticket_success'),
 ]

@@ -43,7 +43,7 @@
 
                 if (response.ok) {
                     // Display the flight results
-                    resultsDiv.innerHTML = data.map(flight => `
+                    resultsDiv.innerHTML = data.length > 0 ? data.map(flight => `
                         <div class="flight">
                             <p><strong>Flight Number:</strong> ${flight.flight_number}</p>
                             <p><strong>Source:</strong> ${flight.source}</p>
@@ -51,16 +51,19 @@
                             <p><strong>Date:</strong> ${flight.date}</p>
                             <p><strong>Time:</strong> ${flight.time}</p>
                             <p><strong>Available Seats:</strong> ${flight.available_seats}</p>
-                            <p><strong>Price:</strong> $${flight.price}</p>
+                            <p><strong>Economy Price:</strong> $${flight.economy_price}</p>
+                            <p><strong>Business Price:</strong> $${flight.business_price}</p>
+                            <p><strong>First Class Price:</strong> $${flight.first_class_price}</p>
                         </div>
                         <hr>
-                    `).join("");
+                    `).join("") : `<p class="error">No flights found for the given criteria.</p>`;
                 } else {
                     // Display error message
                     resultsDiv.innerHTML = `<p class="error">${data.message || "No flights found."}</p>`;
                 }
             } catch (error) {
-                resultsDiv.innerHTML = `<p class="error">An error occurred while searching for flights.</p>`;
+                console.error("Error fetching flight data:", error);
+                resultsDiv.innerHTML = `<p class="error">An error occurred while searching for flights. Please try again later.</p>`;
             }
         });
     </script>

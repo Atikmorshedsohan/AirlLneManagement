@@ -1,4 +1,4 @@
-from django.shortcuts import render, redirect
+from django.shortcuts import get_object_or_404, render, redirect
 from django.contrib import messages
 from django.contrib.auth.models import User
 from django.contrib.auth import authenticate, login, logout
@@ -9,7 +9,7 @@ from django.http import HttpResponseRedirect, Http404,JsonResponse
 from django.db import transaction, models
 from django.db.models import Q
 from .forms import PassengerForm
-from .models import Flight, Registration,ContactMessage
+from .models import Airport, Flight, Registration,ContactMessage, Seat,Ticket
 from django.core.mail import send_mail
 from datetime import datetime
 
@@ -106,16 +106,121 @@ def dashboard(request):
     flights = Flight.objects.all()
     print(flights)  # Print the queryset in the console
     return render(request, 'dashboard.html', {'flights': flights})
+
 def buy_ticket(request):
-    flight_id = request.POST.get('flight_id')
-    passenger_id = request.POST.get('passenger_id')
-    return render(request,'buy_ticket.html')
+    if request.method == 'POST':
+        try:
+            # Collect form data
+            source_airport_id = request.POST.get('source_airport')
+            destination_airport_id = request.POST.get('destination_airport')
+            departure_date = request.POST.get('departure_date')
+            return_date = request.POST.get('return_date')  # Optional
+            ticket_class = request.POST.get('ticket_class')
+            contact_email = request.POST.get('contact_email')
+            contact_phone = request.POST.get('contact_phone')
+            selected_seats = request.POST.getlist('seats')  # List of selected seat numbers
+
+            # Validate airports
+            source_airport = get_object_or_404(Airport, id=source_airport_id)
+            destination_airport = get_object_or_404(Airport, id=destination_airport_id)
+
+            # Validate flight
+            flight = Flight.objects.filter(
+                source_airport=source_airport,
+                destination_airport=destination_airport,
+                date=departure_date
+            ).first()
+
+            if not flight:
+                return render(request, 'buy_ticket.html', {
+                    'airports': Airport.objects.all(),
+                    'error': "No flight exists for the selected source, destination, and date."
+                })
+
+            # Validate seat availability
+            available_seats = flight.seats.filter(seat_number__in=selected_seats, is_sold=False)
+            if len(available_seats) < len(selected_seats):
+                return render(request, 'buy_ticket.html', {
+                    'airports': Airport.objects.all(),
+                    'seat_matrix': _generate_seat_matrix(flight),
+                    'error': "Some selected seats are no longer available. Please try again.",
+                })
+
+            # Determine price per ticket based on ticket class
+            ticket_price = {
+                'Economy': flight.economy_price,
+                'Business': flight.business_price,
+                'First': flight.first_class_price
+            }.get(ticket_class, 0)
+
+            # Save tickets to the database
+            for seat in available_seats:
+                Ticket.objects.create(
+                    flight=flight,
+                    seat=seat,
+                    passenger_name=contact_email,  # Replace with actual passenger names if needed
+                    email=contact_email,
+                    ticket_class=ticket_class,
+                    price=ticket_price
+                )
+                seat.is_sold = True  # Mark seat as sold
+                seat.save()
+
+            # Redirect to success page
+            return redirect('ticket_success', flight_id=flight.id, num_tickets=len(selected_seats))
+
+        except Exception as e:
+            # Log error or display a generic error message
+            return render(request, 'buy_ticket.html', {
+                'airports': Airport.objects.all(),
+                'error': f"An error occurred: {str(e)}"
+            })
+
+    # Render the form with available airports on a GET request
+    return render(request, 'buy_ticket.html', {
+        'airports': Airport.objects.all(),
+        'seat_matrix': _generate_seat_matrix(None),
+    })
+
+
+def _generate_seat_matrix(flight):
+    """
+    Helper function to generate a seat matrix for a flight.
+    """
+    if not flight:
+        return []
+
+    all_seats = flight.seats.all().order_by('seat_number')
+    seat_matrix = []
+    current_row = []
+    current_row_letter = all_seats[0].seat_number[0] if all_seats else None  # First letter of the first seat
+
+    for seat in all_seats:
+        seat_row_letter = seat.seat_number[0]  # Extract row letter from seat number
+        if seat_row_letter == current_row_letter:
+            current_row.append(seat)
+        else:
+            seat_matrix.append(current_row)  # Add completed row to the matrix
+            current_row = [seat]  # Start a new row
+            current_row_letter = seat_row_letter
+
+    if current_row:
+        seat_matrix.append(current_row)  # Add the last row to the matrix
+
+    return seat_matrix
+
+
+
 def navbar(request):
     return render(request, 'navbar.html')
+
+
 def logout_view(request):
     logout(request)
     messages.success(request, "You have successfully logged out.")
     return redirect('login')
+
+
 def contact(request):
     if request.method == 'POST':
         name = request.POST.get('name')
@@ -129,6 +234,9 @@ def contact(request):
         return render(request, 'contact_success.html', {'name': name})
     
     return render(request, 'contact.html')
+
+
+
 def contact_success(request):
     return render(request, 'contact_success.html')
 class CustomPasswordChangeView(PasswordChangeView):
@@ -138,34 +246,34 @@ class CustomPasswordChangeView(PasswordChangeView):
     def form_valid(self, form):
         messages.success(self.request, "Your password has been successfully updated!")
         return super().form_valid(form)
-    
+
+
 def about_us(request):
     return render(request, 'about_us.html') 
 
 
 
+
 def search_flights(request):
-    # Render the search form if no query parameters are passed
     if request.method == 'GET' and not request.GET.get('from'):
         return render(request, 'flight_search.html')
 
-    # Get query parameters from the request
     source = request.GET.get('from', '').strip()
     destination = request.GET.get('to', '').strip()
     date = request.GET.get('date', '').strip()
 
-    # Validate input
+    # Validate input fields
     if not source or not destination or not date:
         return JsonResponse({'message': 'Please provide source, destination, and date.'}, status=400)
 
     try:
-        # Parse the date
+        # Validate date format
         date = datetime.strptime(date, '%Y-%m-%d').date()
 
-        # Query the database for matching flights
+        # Search flights by airport codes
         flights = Flight.objects.filter(
-            source_airport__code__iexact=source,
-            destination_airport__code__iexact=destination,
+            source_airport__code__iexact=source,  # Using airport code
+            destination_airport__code__iexact=destination,  # Using airport code
             date=date
         )
 
@@ -183,15 +291,40 @@ def search_flights(request):
                 'date': flight.date.strftime('%Y-%m-%d'),
                 'time': flight.time.strftime('%H:%M'),
                 'available_seats': flight.available_seats,
-                'price': float(flight.price)
+                'economy_price': float(flight.economy_price),
+                'business_price': float(flight.business_price),
+                'first_class_price': float(flight.first_class_price),
             }
             for flight in flights
         ]
 
         # Return the search results as JSON
         return JsonResponse(flight_list, safe=False)
+
     except ValueError:
+        # Date parsing issue
         return JsonResponse({'message': 'Invalid date format. Use YYYY-MM-DD.'}, status=400)
     except Exception as e:
+        # Generic exception handler
         print(f"Unexpected error: {e}")
         return JsonResponse({'message': 'An internal error occurred.'}, status=500)
+
+
+def ticket_success(request, flight_id, num_tickets):
+    # Fetch the flight details
+    flight = get_object_or_404(Flight, id=flight_id)
+
+    # Fetch the tickets for the flight and user (if needed)
+    tickets = Ticket.objects.filter(flight=flight).order_by('-id')[:num_tickets]
+
+    return render(request, 'ticket_success.html', {
+        'flight': flight,
+        'tickets': tickets,
+        'num_tickets': num_tickets,
+    })
+
+
+def seat_selection(request, flight_id):
+    flight = get_object_or_404(Flight, id=flight_id)
+    seats = flight.seats.all()
+    return render(request, 'seat_selection.html', {'flight': flight, 'seats': seats})
