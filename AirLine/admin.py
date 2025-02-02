@@ -1,15 +1,13 @@
 from django.contrib import admin
-from .models import Flight, Registration, ContactMessage, Airport,Ticket,Seat
-
+from .models import Flight, Registration, ContactMessage, Airport, Ticket
 
 # Admin for Registration
 @admin.register(Registration)
 class RegistrationAdmin(admin.ModelAdmin):
-    list_display = ('full_name', 'phone', 'nid', 'age', 'gender', 'username')  # Fields to display in the admin list
-    search_fields = ('full_name', 'email', 'phone', 'nid')  # Enable search functionality
-    list_filter = ('gender', 'age')  # Add filters for gender and age
-    ordering = ('full_name',)  # Order by full name
-
+    list_display = ('full_name', 'phone', 'nid', 'age', 'gender', 'username')  
+    search_fields = ('full_name', 'email', 'phone', 'nid')  
+    list_filter = ('gender', 'age')  
+    ordering = ('full_name',)  
 
 @admin.register(Airport)
 class AirportAdmin(admin.ModelAdmin):
@@ -24,31 +22,29 @@ class FlightAdmin(admin.ModelAdmin):
     search_fields = ('flight_number', 'source_airport__name', 'destination_airport__name')
     ordering = ['date', 'time']
 
-@admin.register(Seat)
-class SeatAdmin(admin.ModelAdmin):
-    list_display = ('flight', 'seat_number', 'is_sold')
-    list_filter = ('is_sold', 'flight')
-    search_fields = ('seat_number',)
-
 @admin.register(Ticket)
 class TicketAdmin(admin.ModelAdmin):
-    list_display = ('flight', 'passenger_name', 'seat', 'ticket_class', 'price', 'is_approved', 'booked_at')
-    list_filter = ('ticket_class', 'is_approved', 'booked_at')
-    search_fields = ('passenger_name', 'email')
+    list_display = ('flight', 'passenger_name', 'ticket_class', 'price', 'status', 'booked_at')
+    list_filter = ('ticket_class', 'status', 'booked_at')
+    search_fields = ('passenger_name', 'email', 'booking_reference')
     ordering = ('-booked_at',)
-    actions = ['approve_tickets']
+    actions = ['approve_tickets', 'remove_tickets']
 
-    # Custom action to approve selected tickets
     @admin.action(description='Approve selected tickets')
     def approve_tickets(self, request, queryset):
-        updated = queryset.update(is_approved=True)
+        updated = queryset.update(status="Approved")
         self.message_user(request, f"{updated} ticket(s) successfully approved.")
+
+    @admin.action(description='Remove selected tickets')
+    def remove_tickets(self, request, queryset):
+        updated = queryset.update(status="Removed")
+        self.message_user(request, f"{updated} ticket(s) removed.")
 
 # Admin for ContactMessage
 @admin.register(ContactMessage)
 class ContactMessageAdmin(admin.ModelAdmin):
-    list_display = ('name', 'email', 'submitted_at')  # Fields to display in the admin list
-    list_filter = ('submitted_at',)  # Add a filter for submission date
-    search_fields = ('name', 'email', 'message')  # Enable search functionality
-    ordering = ('-submitted_at',)  # Order messages by latest submission first
-    readonly_fields = ('submitted_at',)  # Make the submitted_at field read-only
+    list_display = ('name', 'email', 'submitted_at')  
+    list_filter = ('submitted_at',)  
+    search_fields = ('name', 'email', 'message')  
+    ordering = ('-submitted_at',)  
+    readonly_fields = ('submitted_at',)  

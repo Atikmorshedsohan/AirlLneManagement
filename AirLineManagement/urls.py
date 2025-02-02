@@ -25,11 +25,10 @@ urlpatterns = [
     path('', views.navbar, name='home'),
     path('dashboard/', views.dashboard, name='dashboard'),
     path('buy-ticket/', views.buy_ticket, name='buy_ticket'),
+   path('ticket-success/<int:flight_id>/<int:num_tickets>/', views.ticket_success, name='ticket_success'),
     path('contact/', views.contact, name='contact'),
     path('contact_success/',views.contact_success,name='contact_success.html'),
-    path('about_us/', views.about_us, name='about_us'),
-    # path('search/', views.search_flights, name='search'),
-    # path('search-flights/', include('AirLine.urls')),
+    path('about_us/', views.about_us, name='about_us'),   
     path('search-flights/', views.search_flights, name='search-flights'),
-    path('ticket/<int:flight_id>/<int:num_tickets>/success/', views.ticket_success, name='ticket_success'),
+    
 ]

@@ -3,258 +3,82 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Buy Ticket - Bangladesh Airline</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            background-color: #f5f5f5;
-            margin: 0;
-            padding: 20px;
-            background-image: url(/static/picture/sky.jpg);
-        }
-
-        .container {
-            max-width: 800px;
-            margin: 0 auto;
-            background: #fff;
-            border-radius: 10px;
-            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
-            padding: 20px;
-            text-align: center;
-        }
-
-        h3 {
-            margin-bottom: 20px;
-            color: #333;
-        }
-
-        .form-group {
-            margin-bottom: 15px;
-            text-align: left;
-        }
-
-        .form-group label {
-            display: block;
-            font-size: 1rem;
-            margin-bottom: 5px;
-            color: #333;
-        }
-
-        .form-group input,
-        .form-group select {
-            width: 100%;
-            padding: 10px;
-            font-size: 1rem;
-            border: 1px solid #ddd;
-            border-radius: 5px;
-        }
-
-        .form-group input:focus,
-        .form-group select:focus {
-            border-color: #10457d;
-            outline: none;
-            box-shadow: 0 0 5px rgba(16, 69, 125, 0.5);
-        }
-
-        .seating-chart {
-            display: grid;
-            grid-template-columns: repeat(4, 60px); /* 4 seats per row */
-            gap: 15px;
-            justify-content: center;
-            margin: 20px 0;
-        }
-
-        .seat {
-            width: 50px;
-            height: 50px;
-            border-radius: 5px;
-            border: 1px solid #ccc;
-            text-align: center;
-            line-height: 50px;
-            font-size: 16px;
-            font-weight: bold;
-            cursor: pointer;
-        }
-
-        .seat.available {
-            background-color: #dff0d8;
-        }
-
-        .seat.sold {
-            background-color: #f2dede;
-            cursor: not-allowed;
-        }
-
-        .seat.selected {
-            background-color: #337ab7;
-            color: white;
-        }
-
-        .legend {
-            margin: 20px auto;
-            text-align: center;
-        }
-
-        .legend span {
-            display: inline-block;
-            margin: 0 15px;
-            text-align: center;
-        }
-
-        .legend .legend-box {
-            display: inline-block;
-            width: 20px;
-            height: 20px;
-            border-radius: 5px;
-            margin-right: 5px;
-        }
-
-        .legend .available-box {
-            background-color: #dff0d8;
-        }
-
-        .legend .sold-box {
-            background-color: #f2dede;
-        }
-
-        .legend .selected-box {
-            background-color: #337ab7;
-        }
-
-        .error-message {
-            color: red;
-            margin-bottom: 20px;
-        }
-
-        button {
-            padding: 10px 20px;
-            font-size: 16px;
-            background-color: #10457d;
-            color: white;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-            margin-top: 20px;
-        }
-
-        button:hover {
-            background-color: #0c3c6b;
-        }
-    </style>
+    <title>Buy Your Ticket</title>
+    <link rel="stylesheet" href="/static/css/buy_ticket.css">
 </head>
 <body>
     <div class="container">
-        <h3>Buy Your Ticket</h3>
-
-        {% if error %}
-            <p class="error-message">{{ error }}</p>
-        {% endif %}
-
-        <form method="POST">
+        <h2>Buy Your Ticket</h2>
+        <form id="ticket-form" method="POST">
             {% csrf_token %}
-
-            <!-- Source Airport -->
+            
+            <!-- Hidden input to store flight_id -->
+            <input type="hidden" id="flight_id" name="flight_id" value="{{ flight.id }}">
+        
             <div class="form-group">
-                <label for="source-airport">Source Airport:</label>
-                <select id="source-airport" name="source_airport" required>
-                    <option value="" disabled selected>Select Source Airport</option>
+                <label for="source_airport">Source Airport:</label>
+                <select id="source_airport" name="source_airport" required>
+                    <option value="">Select Source</option>
                     {% for airport in airports %}
-                        <option value="{{ airport.id }}">{{ airport.name }} ({{ airport.code }})</option>
+                        <option value="{{ airport.id }}">{{ airport.name }}</option>
                     {% endfor %}
                 </select>
             </div>
-
-            <!-- Destination Airport -->
+        
             <div class="form-group">
-                <label for="destination-airport">Destination Airport:</label>
-                <select id="destination-airport" name="destination_airport" required>
-                    <option value="" disabled selected>Select Destination Airport</option>
+                <label for="destination_airport">Destination Airport:</label>
+                <select id="destination_airport" name="destination_airport" required>
+                    <option value="">Select Destination</option>
                     {% for airport in airports %}
-                        <option value="{{ airport.id }}">{{ airport.name }} ({{ airport.code }})</option>
+                        <option value="{{ airport.id }}">{{ airport.name }}</option>
                     {% endfor %}
                 </select>
             </div>
-
-            <!-- Departure Date -->
+        
             <div class="form-group">
-                <label for="departure-date">Departure Date:</label>
-                <input type="date" id="departure-date" name="departure_date" required>
+                <label for="departure_date">Departure Date:</label>
+                <input type="date" id="departure_date" name="departure_date" required>
             </div>
-
-            <!-- Return Date -->
+        
             <div class="form-group">
-                <label for="return-date">Return Date:</label>
-                <input type="date" id="return-date" name="return_date">
+                <label for="num_passengers">Number of Passengers:</label>
+                <input type="number" id="num_passengers" name="num_passengers" min="1" required>
             </div>
-
-            <!-- Number of Passengers -->
+        
             <div class="form-group">
-                <label for="num-passengers">Number of Passengers:</label>
-                <input type="number" id="num-passengers" name="num_passengers" required min="1" max="10">
-            </div>
-
-            <!-- Ticket Class -->
-            <div class="form-group">
-                <label for="ticket-class">Ticket Class:</label>
-                <select id="ticket-class" name="ticket_class" required>
-                    <option value="" disabled selected>Select Ticket Class</option>
+                <label for="ticket_class">Ticket Class:</label>
+                <select id="ticket_class" name="ticket_class" required>
                     <option value="Economy">Economy</option>
                     <option value="Business">Business</option>
-                    <option value="First">First</option>
+                    <option value="First">First Class</option>
                 </select>
             </div>
-
-            <!-- Contact Email -->
+        
             <div class="form-group">
-                <label for="contact-email">Contact Email:</label>
-                <input type="email" id="contact-email" name="contact_email" required placeholder="Enter your email">
+                <label for="contact_email">Contact Email:</label>
+                <input type="email" id="contact_email" name="contact_email" required>
             </div>
-
-            <!-- Contact Phone -->
-            <div class="form-group">
-                <label for="contact-phone">Contact Phone (optional):</label>
-                <input type="text" id="contact-phone" name="contact_phone" placeholder="Enter your phone number">
-            </div>
-
-            <!-- Seating Chart -->
-            <h4>Select Your Seats:</h4>
-            <div class="seating-chart">
-                {% for seat in seats %}
-                    <div 
-                        class="seat {% if seat.is_sold %}sold{% else %}available{% endif %}"
-                        data-seat="{{ seat.seat_number }}"
-                        onclick="selectSeat(this)"
-                    >
-                        {{ seat.seat_number }}
-                        <input
-                            type="checkbox"
-                            name="seats"
-                            value="{{ seat.seat_number }}"
-                            style="display: none;"
-                            {% if seat.is_sold %}disabled{% endif %}
-                        >
-                    </div>
-                {% endfor %}
-            </div>
-
-            <div class="legend">
-                <span><div class="legend-box available-box"></div> Available</span>
-                <span><div class="legend-box sold-box"></div> Sold</span>
-                <span><div class="legend-box selected-box"></div> Selected</span>
-            </div>
-
-            <button type="submit">Buy Ticket</button>
+            
+            <button type="submit" class="button">Buy Ticket</button>
         </form>
+        
     </div>
-
-    <script>
-        function selectSeat(seat) {
-            if (!seat.classList.contains('sold')) {
-                seat.classList.toggle('selected');
-                const checkbox = seat.querySelector('input[type="checkbox"]');
-                checkbox.checked = !checkbox.checked;
-            }
-        }
-    </script>
 </body>
 </html>
+<script>
+    document.getElementById('ticket-form').addEventListener('submit', function(event) {
+        event.preventDefault();  // Prevent default submission
+    
+        let flightId = document.getElementById('flight_id').value;  // Get flight ID
+        let numTickets = document.getElementById('num_passengers').value; // Get ticket count
+    
+        if (!flightId || !numTickets) {
+            alert("Flight ID or Number of Tickets is missing!");
+            return;
+        }
+    
+        // Redirect to static URL with flight ID and ticket count
+        window.location.href = `/ticket-success/${flightId}/${numTickets}/`;
+    });
+ </script>
+    

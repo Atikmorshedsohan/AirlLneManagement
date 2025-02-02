@@ -1,0 +1,78 @@
+/* General Page Styling */
+body {
+    font-family: Arial, sans-serif;
+    background-color: #f5f5f5;
+    margin: 0;
+    padding: 20px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+}
+
+/* Container Box */
+.container {
+    background: #fff;
+    border-radius: 10px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+    padding: 30px;
+    width: 500px;
+    text-align: center;
+}
+
+/* Headings */
+h2 {
+    color: #28a745;
+    margin-bottom: 15px;
+}
+
+/* Ticket Information Box */
+.ticket-info {
+    text-align: left;
+    background: #f9f9f9;
+    padding: 15px;
+    border-radius: 5px;
+    border: 1px solid #ddd;
+    margin-top: 15px;
+}
+
+/* Status Labels */
+.status {
+    font-weight: bold;
+    padding: 8px;
+    border-radius: 5px;
+}
+
+.pending {
+    background-color: #ffcc00;
+    color: #7a5d00;
+}
+
+.approved {
+    background-color: #28a745;
+    color: white;
+}
+
+.rejected {
+    background-color: #dc3545;
+    color: white;
+}
+
+/* Buttons */
+.button-container {
+    margin-top: 20px;
+}
+
+.button {
+    padding: 10px 20px;
+    background-color: #10457d;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    text-decoration: none;
+}
+
+.button:hover {
+    background-color: #0c3c6b;
+}

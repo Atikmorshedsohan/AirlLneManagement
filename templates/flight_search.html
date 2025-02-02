@@ -7,24 +7,29 @@
     <link rel="stylesheet" href="/static/css/search.css">
 </head>
 <body>
-    <div class="container">
-        <h1>Search Flights</h1>
-        <form id="searchForm">
-            {% csrf_token %}
-            <label for="from">From (Airport Code):</label>
-            <input type="text" id="from" name="from" required placeholder="Enter source airport code (e.g., JFK)">
+    If you want to modify your HTML code to reflect the changes in your backend logic (searching flights by city names instead of airport codes), you need to update the input fields to better guide the users. Here's the updated HTML code:
+Updated HTML Code
 
-            <label for="to">To (Airport Code):</label>
-            <input type="text" id="to" name="to" required placeholder="Enter destination airport code (e.g., LAX)">
+<div class="container">
+    <h1>Search Flights</h1>
+    <form id="searchForm">
+        {% csrf_token %}
+        <!-- Input for source city -->
+        <label for="from">From (City):</label>
+        <input type="text" id="from" name="from" required placeholder="Enter source city ">
 
-            <label for="date">Date:</label>
-            <input type="date" id="date" name="date" required>
+        <!-- Input for destination city -->
+        <label for="to">To (City):</label>
+        <input type="text" id="to" name="to" required placeholder="Enter destination city ">
+        <!-- Input for flight date -->
+        <label for="date">Date:</label>
+        <input type="date" id="date" name="date" required>
 
-            <button type="submit">Search</button>
-        </form>
+        <button type="submit">Search</button>
+    </form>
 
-        <div id="results"></div>
-    </div>
+    <div id="results"></div>
+</div>
 
     <script>
         document.getElementById("searchForm").addEventListener("submit", async (event) => {

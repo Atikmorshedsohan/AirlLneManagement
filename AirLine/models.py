@@ -1,3 +1,4 @@
+import uuid
 from django.db import models
 from django.contrib.auth.models import User
 from django.utils.timezone import now
@@ -71,20 +72,17 @@ class Flight(models.Model):
         ordering = ['date', 'time']
 
 
-class Seat(models.Model):
-    flight = models.ForeignKey(Flight, on_delete=models.CASCADE, related_name='seats')
-    seat_number = models.CharField(max_length=10)
-    is_sold = models.BooleanField(default=False)
-
-    def __str__(self):
-        return f"{self.seat_number} ({'Sold' if self.is_sold else 'Available'})"
-
-
 class Ticket(models.Model):
+    STATUS_CHOICES = [
+        ('Pending', 'Pending Approval'),
+        ('Approved', 'Approved'),
+        ('Removed', 'Removed'),
+    ]
+    
     flight = models.ForeignKey(Flight, on_delete=models.CASCADE, verbose_name="Flight")
-    seat = models.OneToOneField(Seat, on_delete=models.CASCADE, verbose_name="Seat")
     passenger_name = models.CharField(max_length=100, verbose_name="Passenger Name")
     email = models.EmailField(verbose_name="Email")
+    contact_phone = models.CharField(max_length=15, blank=True, null=True, verbose_name="Contact Phone")
     ticket_class = models.CharField(
         max_length=20,
         choices=[('Economy', 'Economy'), ('Business', 'Business'), ('First', 'First')],
@@ -92,12 +90,22 @@ class Ticket(models.Model):
     )
     price = models.DecimalField(max_digits=10, decimal_places=2, verbose_name="Ticket Price")
     booked_at = models.DateTimeField(auto_now_add=True, verbose_name="Booked At")
-    is_approved = models.BooleanField(default=False, verbose_name="Approved")  # New field
+    booking_reference = models.CharField(max_length=20, unique=True, verbose_name="Booking Reference")
+    payment_status = models.CharField(
+        max_length=20,
+        choices=[('Pending', 'Pending'), ('Completed', 'Completed'), ('Failed', 'Failed')],
+        default='Pending',
+        verbose_name="Payment Status"
+    )
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='Pending', verbose_name="Approval Status")
+
+    def save(self, *args, **kwargs):
+        if not self.booking_reference:
+            self.booking_reference = str(uuid.uuid4())[:20]  # Generate unique booking reference
+        super().save(*args, **kwargs)
 
     def __str__(self):
-        status = "Approved" if self.is_approved else "Pending Approval"
-        return f"Ticket: {self.passenger_name} ({self.flight.flight_number}) - {status}"
-
+        return f"Ticket: {self.passenger_name} ({self.flight.flight_number}) - {self.status} - {self.payment_status}"
 
 class ContactMessage(models.Model):
     name = models.CharField(max_length=100)

@@ -1,3 +1,4 @@
+import uuid
 from django.shortcuts import get_object_or_404, render, redirect
 from django.contrib import messages
 from django.contrib.auth.models import User
@@ -9,7 +10,7 @@ from django.http import HttpResponseRedirect, Http404,JsonResponse
 from django.db import transaction, models
 from django.db.models import Q
 from .forms import PassengerForm
-from .models import Airport, Flight, Registration,ContactMessage, Seat,Ticket
+from .models import Airport, Flight, Registration,ContactMessage,Ticket
 from django.core.mail import send_mail
 from datetime import datetime
 
@@ -35,6 +36,8 @@ def login_interface(request):
 
     # Render the login form for GET requests
     return render(request, 'login.html')
+
+
 def registration(request):
     if request.method == 'POST':
         form = PassengerForm(request.POST)
@@ -102,6 +105,8 @@ def profile_view(request):
         }
     }
     return render(request, 'profile.html', context)
+
+
 def dashboard(request):
     flights = Flight.objects.all()
     print(flights)  # Print the queryset in the console
@@ -110,21 +115,16 @@ def dashboard(request):
 def buy_ticket(request):
     if request.method == 'POST':
         try:
-            # Collect form data
             source_airport_id = request.POST.get('source_airport')
             destination_airport_id = request.POST.get('destination_airport')
             departure_date = request.POST.get('departure_date')
-            return_date = request.POST.get('return_date')  # Optional
+            num_passengers = int(request.POST.get('num_passengers'))
             ticket_class = request.POST.get('ticket_class')
             contact_email = request.POST.get('contact_email')
-            contact_phone = request.POST.get('contact_phone')
-            selected_seats = request.POST.getlist('seats')  # List of selected seat numbers
 
-            # Validate airports
             source_airport = get_object_or_404(Airport, id=source_airport_id)
             destination_airport = get_object_or_404(Airport, id=destination_airport_id)
 
-            # Validate flight
             flight = Flight.objects.filter(
                 source_airport=source_airport,
                 destination_airport=destination_airport,
@@ -132,83 +132,49 @@ def buy_ticket(request):
             ).first()
 
             if not flight:
-                return render(request, 'buy_ticket.html', {
-                    'airports': Airport.objects.all(),
-                    'error': "No flight exists for the selected source, destination, and date."
-                })
+                messages.error(request, "No flight found.")
+                return redirect('buy_ticket')
 
-            # Validate seat availability
-            available_seats = flight.seats.filter(seat_number__in=selected_seats, is_sold=False)
-            if len(available_seats) < len(selected_seats):
-                return render(request, 'buy_ticket.html', {
-                    'airports': Airport.objects.all(),
-                    'seat_matrix': _generate_seat_matrix(flight),
-                    'error': "Some selected seats are no longer available. Please try again.",
-                })
-
-            # Determine price per ticket based on ticket class
             ticket_price = {
                 'Economy': flight.economy_price,
                 'Business': flight.business_price,
                 'First': flight.first_class_price
             }.get(ticket_class, 0)
 
-            # Save tickets to the database
-            for seat in available_seats:
-                Ticket.objects.create(
-                    flight=flight,
-                    seat=seat,
-                    passenger_name=contact_email,  # Replace with actual passenger names if needed
-                    email=contact_email,
-                    ticket_class=ticket_class,
-                    price=ticket_price
-                )
-                seat.is_sold = True  # Mark seat as sold
-                seat.save()
+            tickets_created = []
+            with transaction.atomic():
+                for _ in range(num_passengers):
+                    ticket = Ticket.objects.create(
+                        flight=flight,
+                        email=contact_email,
+                        ticket_class=ticket_class,
+                        price=ticket_price,
+                        status="Pending Approval"
+                    )
+                    tickets_created.append(ticket.id)  # Store ticket IDs for debugging
 
-            # Redirect to success page
-            return redirect('ticket_success', flight_id=flight.id, num_tickets=len(selected_seats))
+            messages.success(request, f"Tickets booked! Ticket IDs: {tickets_created}")
+            return redirect('ticket_success', flight_id=flight.id, num_tickets=num_passengers)
 
         except Exception as e:
-            # Log error or display a generic error message
-            return render(request, 'buy_ticket.html', {
-                'airports': Airport.objects.all(),
-                'error': f"An error occurred: {str(e)}"
-            })
+            messages.error(request, f"Error: {str(e)}")
+            return redirect('buy_ticket')
 
-    # Render the form with available airports on a GET request
-    return render(request, 'buy_ticket.html', {
-        'airports': Airport.objects.all(),
-        'seat_matrix': _generate_seat_matrix(None),
-    })
+    airports = Airport.objects.all()
+    return render(request, 'buy_ticket.html', {'airports': airports})
 
 
-def _generate_seat_matrix(flight):
-    """
-    Helper function to generate a seat matrix for a flight.
-    """
-    if not flight:
-        return []
+def admin_approve_ticket(request, ticket_id):
+    if not request.user.is_staff:
+        messages.error(request, "Unauthorized action.")
+        return redirect('admin_dashboard')
 
-    all_seats = flight.seats.all().order_by('seat_number')
-    seat_matrix = []
-    current_row = []
-    current_row_letter = all_seats[0].seat_number[0] if all_seats else None  # First letter of the first seat
+    ticket = get_object_or_404(Ticket, id=ticket_id)
+    ticket.status = "Approved"
+    ticket.save()
 
-    for seat in all_seats:
-        seat_row_letter = seat.seat_number[0]  # Extract row letter from seat number
-        if seat_row_letter == current_row_letter:
-            current_row.append(seat)
-        else:
-            seat_matrix.append(current_row)  # Add completed row to the matrix
-            current_row = [seat]  # Start a new row
-            current_row_letter = seat_row_letter
-
-    if current_row:
-        seat_matrix.append(current_row)  # Add the last row to the matrix
-
-    return seat_matrix
-
+    messages.success(request, "Ticket approved successfully!")
+    return redirect('admin_dashboard')
 
 
 def navbar(request):
@@ -272,10 +238,11 @@ def search_flights(request):
 
         # Search flights by airport codes
         flights = Flight.objects.filter(
-            source_airport__code__iexact=source,  # Using airport code
-            destination_airport__code__iexact=destination,  # Using airport code
+            source_airport__city__iexact=source,  # Using source city
+            destination_airport__city__iexact=destination,  # Using destination city
             date=date
         )
+
 
         # Check if flights exist
         if not flights.exists():
@@ -311,17 +278,14 @@ def search_flights(request):
 
 
 def ticket_success(request, flight_id, num_tickets):
-    # Fetch the flight details
+    # Ensure flight exists
     flight = get_object_or_404(Flight, id=flight_id)
 
-    # Fetch the tickets for the flight and user (if needed)
-    tickets = Ticket.objects.filter(flight=flight).order_by('-id')[:num_tickets]
-
-    return render(request, 'ticket_success.html', {
-        'flight': flight,
-        'tickets': tickets,
-        'num_tickets': num_tickets,
+    return render(request, "ticket_success.html", {
+        "flight": flight,
+        "num_tickets": num_tickets
     })
+
 
 
 def seat_selection(request, flight_id):
