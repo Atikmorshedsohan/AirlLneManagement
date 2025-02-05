@@ -122,6 +122,7 @@ def buy_ticket(request):
             ticket_class = request.POST.get('ticket_class')
             contact_email = request.POST.get('contact_email')
 
+            # Fetch airport and flight data
             source_airport = get_object_or_404(Airport, id=source_airport_id)
             destination_airport = get_object_or_404(Airport, id=destination_airport_id)
 
@@ -132,17 +133,19 @@ def buy_ticket(request):
             ).first()
 
             if not flight:
-                messages.error(request, "No flight found.")
+                messages.error(request, "No flight found for the selected criteria.")
                 return redirect('buy_ticket')
 
+            # Get ticket price based on class
             ticket_price = {
                 'Economy': flight.economy_price,
                 'Business': flight.business_price,
                 'First': flight.first_class_price
             }.get(ticket_class, 0)
 
-            tickets_created = []
+            # Book tickets
             with transaction.atomic():
+                tickets_created = []
                 for _ in range(num_passengers):
                     ticket = Ticket.objects.create(
                         flight=flight,
@@ -151,17 +154,34 @@ def buy_ticket(request):
                         price=ticket_price,
                         status="Pending Approval"
                     )
-                    tickets_created.append(ticket.id)  # Store ticket IDs for debugging
+                    tickets_created.append(ticket.id)
 
-            messages.success(request, f"Tickets booked! Ticket IDs: {tickets_created}")
-            return redirect('ticket_success', flight_id=flight.id, num_tickets=num_passengers)
+            messages.success(request, "Tickets successfully booked!")
+            return redirect(f'/ticket-success/{flight.id}/{num_passengers}/?contact_email={contact_email}')
 
         except Exception as e:
             messages.error(request, f"Error: {str(e)}")
             return redirect('buy_ticket')
 
+    # Render form with airport data
     airports = Airport.objects.all()
     return render(request, 'buy_ticket.html', {'airports': airports})
+
+
+
+
+def ticket_success(request, flight_id, num_tickets):
+    flight = get_object_or_404(Flight, id=flight_id)
+    contact_email = request.GET.get('contact_email', '')
+
+    # Fetch only tickets belonging to this user
+    tickets = Ticket.objects.filter(flight=flight, email=contact_email).order_by('-id')[:num_tickets]
+
+    return render(request, "ticket_success.html", {
+        "flight": flight,
+        "num_tickets": num_tickets,
+        "tickets": tickets
+    })
 
 
 def admin_approve_ticket(request, ticket_id):
@@ -275,16 +295,6 @@ def search_flights(request):
         # Generic exception handler
         print(f"Unexpected error: {e}")
         return JsonResponse({'message': 'An internal error occurred.'}, status=500)
-
-
-def ticket_success(request, flight_id, num_tickets):
-    # Ensure flight exists
-    flight = get_object_or_404(Flight, id=flight_id)
-
-    return render(request, "ticket_success.html", {
-        "flight": flight,
-        "num_tickets": num_tickets
-    })
 
 
 

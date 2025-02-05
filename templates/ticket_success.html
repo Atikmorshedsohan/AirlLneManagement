@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -22,12 +21,14 @@
             <p><strong>Number of Tickets:</strong> {{ num_tickets }}</p>
         </div>
 
-        <h3>Ticket Status:</h3>
+        {% if tickets %}
+        <h3>Ticket Details:</h3>
         <ul>
             {% for ticket in tickets %}
                 <li>
-                    <strong>Passenger:</strong> {{ ticket.passenger_name }} |
+                    <strong>Passenger Email:</strong> {{ ticket.email }} |
                     <strong>Class:</strong> {{ ticket.ticket_class }} |
+                    <strong>Price:</strong> ${{ ticket.price }} |
                     <strong>Status:</strong>
                     <span class="status {% if ticket.status == 'Approved' %}approved{% elif ticket.status == 'Pending' %}pending{% else %}rejected{% endif %}">
                         {{ ticket.status }}
@@ -35,6 +36,9 @@
                 </li>
             {% endfor %}
         </ul>
+        {% else %}
+            <p>No ticket details available.</p>
+        {% endif %}
 
         <div class="button-container">
             <a href="{% url 'dashboard' %}" class="button">Back to Dashboard</a>
@@ -42,4 +46,3 @@
     </div>
 </body>
 </html>
-
