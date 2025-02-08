@@ -1,3 +1,4 @@
+import json
 import uuid
 from django.shortcuts import get_object_or_404, render, redirect
 from django.contrib import messages
@@ -112,76 +113,141 @@ def dashboard(request):
     print(flights)  # Print the queryset in the console
     return render(request, 'dashboard.html', {'flights': flights})
 
+
 def buy_ticket(request):
+    airports = Airport.objects.all()
+
     if request.method == 'POST':
-        try:
-            source_airport_id = request.POST.get('source_airport')
-            destination_airport_id = request.POST.get('destination_airport')
-            departure_date = request.POST.get('departure_date')
-            num_passengers = int(request.POST.get('num_passengers'))
-            ticket_class = request.POST.get('ticket_class')
-            contact_email = request.POST.get('contact_email')
+        source_id = request.POST.get('source')
+        destination_id = request.POST.get('destination')
+        departure_date = request.POST.get('departure_date')  
+        passenger_name = request.POST.get('passenger_name')
+        email = request.POST.get('email')
+        ticket_class = request.POST.get('ticket_class')
+        num_seats = int(request.POST.get('num_seats'))
 
-            # Fetch airport and flight data
-            source_airport = get_object_or_404(Airport, id=source_airport_id)
-            destination_airport = get_object_or_404(Airport, id=destination_airport_id)
-
-            flight = Flight.objects.filter(
-                source_airport=source_airport,
-                destination_airport=destination_airport,
-                date=departure_date
-            ).first()
-
-            if not flight:
-                messages.error(request, "No flight found for the selected criteria.")
-                return redirect('buy_ticket')
-
-            # Get ticket price based on class
-            ticket_price = {
-                'Economy': flight.economy_price,
-                'Business': flight.business_price,
-                'First': flight.first_class_price
-            }.get(ticket_class, 0)
-
-            # Book tickets
-            with transaction.atomic():
-                tickets_created = []
-                for _ in range(num_passengers):
-                    ticket = Ticket.objects.create(
-                        flight=flight,
-                        email=contact_email,
-                        ticket_class=ticket_class,
-                        price=ticket_price,
-                        status="Pending Approval"
-                    )
-                    tickets_created.append(ticket.id)
-
-            messages.success(request, "Tickets successfully booked!")
-            return redirect(f'/ticket-success/{flight.id}/{num_passengers}/?contact_email={contact_email}')
-
-        except Exception as e:
-            messages.error(request, f"Error: {str(e)}")
+        if source_id == destination_id:
+            messages.error(request, "Source and destination cannot be the same.")
             return redirect('buy_ticket')
 
-    # Render form with airport data
-    airports = Airport.objects.all()
+        flight = Flight.objects.filter(
+            source_airport_id=source_id,  
+            destination_airport_id=destination_id,  
+            date=departure_date
+        ).first()
+
+        if not flight:
+            messages.error(request, "No available flights for the selected route and date.")
+            return redirect('buy_ticket')
+
+        # Determine price per ticket class
+        price_mapping = {
+            "Economy": flight.economy_price,
+            "Business": flight.business_price,
+            "First": flight.first_class_price
+        }
+        price_per_ticket = price_mapping.get(ticket_class, flight.economy_price)
+
+        # Calculate the total price for the number of seats booked
+        total_price = price_per_ticket * num_seats
+
+        # Ensure enough available seats
+        if num_seats > flight.available_seats:
+            messages.error(request, f"Only {flight.available_seats} seat(s) available for this flight.")
+            return redirect('buy_ticket')
+
+        # Deduct the booked seats from available seats
+        flight.available_seats -= num_seats
+        flight.save()
+
+        # Create multiple tickets with the total price divided per seat
+        tickets = [
+            Ticket(
+                flight=flight,
+                passenger_name=passenger_name,
+                email=email,
+                ticket_class=ticket_class,
+                price=price_per_ticket,  # Price per seat
+                booking_reference=uuid.uuid4().hex[:20]
+            ) for _ in range(num_seats)
+        ]
+        Ticket.objects.bulk_create(tickets)
+
+        # Get the first ticket's booking reference to redirect to details page
+        first_ticket_ref = tickets[0].booking_reference
+
+        messages.success(request, f"{num_seats} ticket(s) booked successfully! Total price: ${total_price}")
+
+        # Redirect to the ticket details page
+        return redirect('ticket_details', booking_reference=first_ticket_ref)
+
     return render(request, 'buy_ticket.html', {'airports': airports})
 
 
 
+def payment_page(request):
+    ticket = Ticket.objects.first()  # Fetches the first available ticket
 
-def ticket_success(request, flight_id, num_tickets):
-    flight = get_object_or_404(Flight, id=flight_id)
-    contact_email = request.GET.get('contact_email', '')
+    if not ticket:
+        return render(request, 'error.html', {'message': "No tickets available."})
 
-    # Fetch only tickets belonging to this user
-    tickets = Ticket.objects.filter(flight=flight, email=contact_email).order_by('-id')[:num_tickets]
+    context = {
+        'ticket': {
+            'passenger_name': ticket.passenger_name,
+            'email': ticket.email,
+            'flight_number': ticket.flight.flight_number,
+            'source': ticket.flight.source_airport.name,
+            'destination': ticket.flight.destination_airport.name,
+            'ticket_class': ticket.ticket_class,
+            'price': ticket.price,
+            'booking_reference': ticket.booking_reference,
+            'payment_status': ticket.payment_status,
+        }
+    }
 
-    return render(request, "ticket_success.html", {
-        "flight": flight,
-        "num_tickets": num_tickets,
-        "tickets": tickets
-    })
+    return render(request, 'payment_page.html', context)
+
+
+
+def ticket_details(request, booking_reference):
+    # Fetch all tickets with the same booking reference (for multiple seats)
+    tickets = Ticket.objects.filter(booking_reference=booking_reference)
+
+    if not tickets.exists():
+        return render(request, 'error.html', {'message': "No ticket found."})
+
+    # Get the first ticket's details (since all share the same booking reference)
+    first_ticket = tickets.first()
+
+    # Calculate total price for all tickets under this booking
+    total_price = sum(ticket.price for ticket in tickets)
+
+    context = {
+        'ticket': {
+            'passenger_name': first_ticket.passenger_name,
+            'email': first_ticket.email,
+            'flight_number': first_ticket.flight.flight_number,
+            'flight_name': first_ticket.flight.flight_name,
+            'source': first_ticket.flight.source_airport.name,
+            'destination': first_ticket.flight.destination_airport.name,
+            'ticket_class': first_ticket.ticket_class,
+            'price_per_ticket': first_ticket.price,  # Single ticket price
+            'num_seats': tickets.count(),  # Count the total seats booked
+            'total_price': total_price,  # Sum of all tickets
+            'booking_reference': first_ticket.booking_reference,
+        }
+    }
+
+    return render(request, 'ticket_details.html', context)
+
+
+def fingerprint_scan(request):
+    # This would be where you handle fingerprint logic, for now just render a page
+    # if request.method == 'POST':
+        # Logic for handling the fingerprint data can go here
+        # return redirect('boarding_pass')  # Assuming there’s a boarding pass view
+
+    return render(request, 'fingerprint_scan.html')
 
 
 def admin_approve_ticket(request, ticket_id):

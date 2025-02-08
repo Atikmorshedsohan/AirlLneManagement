@@ -3,48 +3,50 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Buy Your Ticket</title>
+    <title>Book a Flight</title>
     <link rel="stylesheet" href="/static/css/buy_ticket.css">
 </head>
 <body>
     <div class="container">
-        <h2>Buy Your Ticket</h2>
+        <h2>Book Your Flight Ticket</h2>
         <form id="ticket-form" method="POST">
             {% csrf_token %}
-            
-            <!-- Hidden input to store flight_id -->
-            <input type="hidden" id="flight_id" name="flight_id" value="{{ flight.id }}">
-        
+
             <div class="form-group">
-                <label for="source_airport">Source Airport:</label>
-                <select id="source_airport" name="source_airport" required>
+                <label for="source">Source:</label>
+                <select id="source" name="source" required>
                     <option value="">Select Source</option>
                     {% for airport in airports %}
                         <option value="{{ airport.id }}">{{ airport.name }}</option>
                     {% endfor %}
                 </select>
             </div>
-        
+
             <div class="form-group">
-                <label for="destination_airport">Destination Airport:</label>
-                <select id="destination_airport" name="destination_airport" required>
+                <label for="destination">Destination:</label>
+                <select id="destination" name="destination" required>
                     <option value="">Select Destination</option>
                     {% for airport in airports %}
                         <option value="{{ airport.id }}">{{ airport.name }}</option>
                     {% endfor %}
                 </select>
             </div>
-        
+
             <div class="form-group">
                 <label for="departure_date">Departure Date:</label>
                 <input type="date" id="departure_date" name="departure_date" required>
             </div>
-        
+
             <div class="form-group">
-                <label for="num_passengers">Number of Passengers:</label>
-                <input type="number" id="num_passengers" name="num_passengers" min="1" required>
+                <label for="passenger_name">Passenger Name:</label>
+                <input type="text" id="passenger_name" name="passenger_name" required>
             </div>
-        
+
+            <div class="form-group">
+                <label for="email">Email:</label>
+                <input type="email" id="email" name="email" required>
+            </div>
+
             <div class="form-group">
                 <label for="ticket_class">Ticket Class:</label>
                 <select id="ticket_class" name="ticket_class" required>
@@ -53,32 +55,14 @@
                     <option value="First">First Class</option>
                 </select>
             </div>
-        
+
             <div class="form-group">
-                <label for="contact_email">Contact Email:</label>
-                <input type="email" id="contact_email" name="contact_email" required>
+                <label for="num_seats">Number of Seats:</label>
+                <input type="number" id="num_seats" name="num_seats" min="1" required>
             </div>
-            
-            <button type="submit" class="button">Buy Ticket</button>
+
+            <button type="submit" class="button">Book Ticket</button>
         </form>
-        
     </div>
 </body>
 </html>
-<script>
-    document.getElementById('ticket-form').addEventListener('submit', function(event) {
-        event.preventDefault();  // Prevent default submission
-    
-        let flightId = document.getElementById('flight_id').value;  // Get flight ID
-        let numTickets = document.getElementById('num_passengers').value; // Get ticket count
-    
-        if (!flightId || !numTickets) {
-            alert("Flight ID or Number of Tickets is missing!");
-            return;
-        }
-    
-        // Redirect to static URL with flight ID and ticket count
-        window.location.href = `/ticket-success/${flightId}/${numTickets}/`;
-    });
- </script>
-    

@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ticket Details</title>
+    <link rel="stylesheet" href="/static/css/ticket_details.css">
+</head>
+<body>
+    <div class="ticket">
+        <div class="ticket-header">
+            <h2>BOARDING PASS</h2>
+        </div>
+
+        <div class="ticket-body">
+            <div class="section">
+                <p><strong>Passenger:</strong> {{ ticket.passenger_name }}</p>
+                <p><strong>Email:</strong> {{ ticket.email }}</p>
+            </div>
+
+            <div class="section">
+                <p><strong>Flight Number:</strong> {{ ticket.flight_number }}</p>
+                <p><strong>Flight Name:</strong> {{ ticket.flight_name }}</p>
+            </div>
+
+            <div class="section">
+                <p><strong>From:</strong> {{ ticket.source }}</p>
+                <p><strong>To:</strong> {{ ticket.destination }}</p>
+            </div>
+
+            <div class="section">
+                <p><strong>Class:</strong> {{ ticket.ticket_class }}</p>
+                <p><strong>Price per Ticket:</strong> ${{ ticket.price_per_ticket }}</p>
+                <p><strong>Number of Seats:</strong> {{ ticket.num_seats }}</p>
+                <p><strong>Total Amount:</strong> <span style="color: blue;">${{ ticket.total_price }}</span></p>
+            </div>
+
+            <div class="ticket-footer">
+                <p><strong>Booking Reference:</strong> {{ ticket.booking_reference }}</p>
+            </div>
+        </div>
+
+        <div class="continue-button">
+            <a href="/fingerprint-scan" class="btn">Continue to Fingerprint Scan</a>
+        </div>
+    </div>
+</body>
+</html>

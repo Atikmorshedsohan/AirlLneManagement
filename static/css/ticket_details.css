@@ -1,0 +1,82 @@
+body {
+    font-family: Arial, sans-serif;
+    background: url('/static/picture/2nd\ Bg.jpg') no-repeat center center fixed;
+    background-size: cover;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    margin: 0;
+}
+
+.ticket {
+    width: 400px;
+    background-color: rgba(255, 255, 255, 0.9);
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    overflow: hidden;
+    border-left: 5px solid #ff4500;
+    backdrop-filter: blur(5px);
+}
+
+.ticket-header {
+    background-color: #ff4500;
+    color: white;
+    text-align: center;
+    padding: 15px;
+    font-size: 20px;
+    font-weight: bold;
+}
+
+.ticket-body {
+    padding: 20px;
+}
+
+.section {
+    margin-bottom: 15px;
+    border-bottom: 1px dashed #ccc;
+    padding-bottom: 10px;
+}
+
+.section:last-child {
+    border-bottom: none;
+}
+
+p {
+    margin: 5px 0;
+    font-size: 16px;
+    color: #333;
+}
+
+strong {
+    color: #222;
+}
+
+.ticket-footer {
+    background-color: #f8f8f8;
+    padding: 15px;
+    text-align: center;
+    font-size: 14px;
+    font-weight: bold;
+    border-top: 2px solid #ff4500;
+}
+
+.continue-button {
+    text-align: center;
+    padding: 20px;
+}
+
+.btn {
+    display: inline-block;
+    background-color: #ff4500;
+    color: white;
+    padding: 10px 20px;
+    text-decoration: none;
+    font-size: 16px;
+    border-radius: 5px;
+    transition: background 0.3s ease;
+}
+
+.btn:hover {
+    background-color: #d63c00;
+}

@@ -42,7 +42,7 @@ class Airport(models.Model):
     code = models.CharField(max_length=10, unique=True, verbose_name="Airport Code (IATA/ICAO)")
 
     def __str__(self):
-        return f"{self.name} ({self.code})"
+        return self.name  # Changed from f"{self.name} ({self.code})"
 
     class Meta:
         verbose_name = "Airport"
@@ -78,8 +78,13 @@ class Ticket(models.Model):
         ('Approved', 'Approved'),
         ('Removed', 'Removed'),
     ]
+    PAYMENT_STATUS_CHOICES = [
+        ('Pending', 'Pending'),
+        ('Completed', 'Completed'),
+        ('Failed', 'Failed'),
+    ]
     
-    flight = models.ForeignKey(Flight, on_delete=models.CASCADE, verbose_name="Flight")
+    flight = models.ForeignKey('Flight', on_delete=models.CASCADE, verbose_name="Flight")
     passenger_name = models.CharField(max_length=100, verbose_name="Passenger Name")
     email = models.EmailField(verbose_name="Email")
     contact_phone = models.CharField(max_length=15, blank=True, null=True, verbose_name="Contact Phone")
@@ -93,15 +98,16 @@ class Ticket(models.Model):
     booking_reference = models.CharField(max_length=20, unique=True, verbose_name="Booking Reference")
     payment_status = models.CharField(
         max_length=20,
-        choices=[('Pending', 'Pending'), ('Completed', 'Completed'), ('Failed', 'Failed')],
+        choices=PAYMENT_STATUS_CHOICES,
         default='Pending',
         verbose_name="Payment Status"
     )
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='Pending', verbose_name="Approval Status")
 
     def save(self, *args, **kwargs):
+        """Generate a unique booking reference before saving."""
         if not self.booking_reference:
-            self.booking_reference = str(uuid.uuid4())[:20]  # Generate unique booking reference
+            self.booking_reference = uuid.uuid4().hex[:20]  # More reliable unique value
         super().save(*args, **kwargs)
 
     def __str__(self):
