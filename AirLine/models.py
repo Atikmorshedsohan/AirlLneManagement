@@ -52,6 +52,7 @@ class Airport(models.Model):
 
 class Flight(models.Model):
     flight_number = models.CharField(max_length=20, unique=True, verbose_name="Flight Number")
+    flight_name = models.CharField(max_length=100, verbose_name="Flight Name") 
     source_airport = models.ForeignKey(Airport, related_name="departing_flights", on_delete=models.CASCADE, verbose_name="Source Airport")
     destination_airport = models.ForeignKey(Airport, related_name="arriving_flights", on_delete=models.CASCADE, verbose_name="Destination Airport")
     date = models.DateField(verbose_name="Flight Date")
@@ -95,7 +96,7 @@ class Ticket(models.Model):
     )
     price = models.DecimalField(max_digits=10, decimal_places=2, verbose_name="Ticket Price")
     booked_at = models.DateTimeField(auto_now_add=True, verbose_name="Booked At")
-    booking_reference = models.CharField(max_length=20, unique=True, verbose_name="Booking Reference")
+    booking_reference = models.CharField(max_length=20, verbose_name="Booking Reference")
     payment_status = models.CharField(
         max_length=20,
         choices=PAYMENT_STATUS_CHOICES,
@@ -103,15 +104,33 @@ class Ticket(models.Model):
         verbose_name="Payment Status"
     )
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='Pending', verbose_name="Approval Status")
+    
+    # ✅ System Assigned Seat Number
+    seat_number = models.CharField(max_length=5, blank=True, null=True, verbose_name="Seat Number")
 
     def save(self, *args, **kwargs):
-        """Generate a unique booking reference before saving."""
+        """Assign a unique seat number based on system availability."""
         if not self.booking_reference:
-            self.booking_reference = uuid.uuid4().hex[:20]  # More reliable unique value
+            self.booking_reference = uuid.uuid4().hex[:20]  # Generate unique booking reference
+
+        if not self.seat_number:
+            self.seat_number = self.assign_seat()  # Assign a seat using system logic
+
         super().save(*args, **kwargs)
 
+    def assign_seat(self):
+        """Assign the next available seat for this flight."""
+        existing_seats = Ticket.objects.filter(flight=self.flight).values_list('seat_number', flat=True)
+        all_seats = [f"{row}{col}" for row in range(1, 31) for col in "ABCDEF"]  # Example: "1A", "1B", ...
+        
+        for seat in all_seats:
+            if seat not in existing_seats:
+                return seat  # Return the first available seat
+
+        raise ValueError("No seats available for this flight!")
+
     def __str__(self):
-        return f"Ticket: {self.passenger_name} ({self.flight.flight_number}) - {self.status} - {self.payment_status}"
+        return f"Ticket: {self.passenger_name} ({self.flight.flight_number}) - Seat: {self.seat_number}"
 
 class ContactMessage(models.Model):
     name = models.CharField(max_length=100)

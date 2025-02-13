@@ -5,15 +5,141 @@ from django.contrib import messages
 from django.contrib.auth.models import User
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
-from django.contrib.auth.views import PasswordChangeView, PasswordResetView, PasswordResetDoneView, PasswordResetConfirmView, PasswordResetCompleteView
+from django.contrib.auth.views import (
+    PasswordChangeView, PasswordResetView, PasswordResetDoneView, 
+    PasswordResetConfirmView, PasswordResetCompleteView
+)
 from django.urls import reverse, reverse_lazy
-from django.http import HttpResponseRedirect, Http404,JsonResponse
+from django.http import HttpResponseRedirect, Http404, JsonResponse, HttpResponse
 from django.db import transaction, models
-from django.db.models import Q
+from django.db.models import Q,Sum
 from .forms import PassengerForm
-from .models import Airport, Flight, Registration,ContactMessage,Ticket
+from .models import Airport, Flight, Registration, ContactMessage, Ticket
 from django.core.mail import send_mail
 from datetime import datetime
+#For pdf
+
+from django.template.loader import get_template
+from xhtml2pdf import pisa
+
+
+def generate_ticket_pdf(request, booking_reference):
+    """Generate and return a flight ticket PDF."""
+    tickets = Ticket.objects.filter(booking_reference=booking_reference)
+    
+    if not tickets.exists():
+        return HttpResponse("No ticket found", status=404)
+    
+    first_ticket = tickets.first()
+    
+    template_path = 'ticket_pdf.html'
+    context = {'ticket': first_ticket}
+    
+    response = HttpResponse(content_type='application/pdf')
+    response['Content-Disposition'] = f'attachment; filename="ticket_{booking_reference}.pdf"'
+    
+    template = get_template(template_path)
+    html = template.render(context)
+    
+    pisa_status = pisa.CreatePDF(html, dest=response)
+    
+    if pisa_status.err:
+        return HttpResponse('Error generating PDF', status=500)
+    
+    return response
+
+
+def buy_ticket(request):
+    airports = Airport.objects.all()
+
+    if request.method == 'POST':
+        source_id = request.POST.get('source')
+        destination_id = request.POST.get('destination')
+        departure_date = request.POST.get('departure_date')
+        passenger_name = request.POST.get('passenger_name')
+        email = request.POST.get('email')
+        ticket_class = request.POST.get('ticket_class')
+        num_seats = int(request.POST.get('num_seats'))
+
+        if source_id == destination_id:
+            messages.error(request, "Source and destination cannot be the same.")
+            return redirect('buy_ticket')
+
+        flight = Flight.objects.filter(
+            source_airport_id=source_id,
+            destination_airport_id=destination_id,
+            date=departure_date
+        ).first()
+
+        if not flight:
+            messages.error(request, "No available flights for the selected route and date.")
+            return redirect('buy_ticket')
+
+        price_mapping = {
+            "Economy": flight.economy_price,
+            "Business": flight.business_price,
+            "First": flight.first_class_price
+        }
+        price_per_ticket = price_mapping.get(ticket_class, flight.economy_price)
+
+        # ✅ Calculate total price here instead of importing total_price
+        total_price_value = price_per_ticket * num_seats  
+
+        if num_seats > flight.available_seats:
+            messages.error(request, f"Only {flight.available_seats} seat(s) available for this flight.")
+            return redirect('buy_ticket')
+
+        flight.available_seats -= num_seats
+        flight.save()
+
+        # ✅ Generate a shared booking reference for all tickets in this booking
+        shared_booking_reference = uuid.uuid4().hex[:20]
+
+        tickets = []
+        for _ in range(num_seats):
+            ticket = Ticket(
+                flight=flight,
+                passenger_name=passenger_name,
+                email=email,
+                ticket_class=ticket_class,
+                price=total_price_value,
+                booking_reference=shared_booking_reference,  # Shared reference for all tickets
+            )
+            ticket.save()  # Save individually to assign unique seat_number
+            tickets.append(ticket)
+
+        return redirect('ticket_details', booking_reference=shared_booking_reference)
+
+    return render(request, 'buy_ticket.html', {'airports': airports})
+
+
+
+
+def ticket_details(request, booking_reference):
+    tickets = Ticket.objects.filter(booking_reference=booking_reference).select_related('flight')
+
+    if not tickets.exists():
+        messages.error(request, "No ticket found.")
+        return redirect('buy_ticket')
+
+    first_ticket = tickets.first()
+    flight = first_ticket.flight if first_ticket else None
+
+    ticket_info = {
+        'passenger_name': first_ticket.passenger_name,
+        'email': first_ticket.email,
+        'flight_number': getattr(flight, 'flight_number', "N/A"),
+        'flight_name': getattr(flight, 'flight_name', "N/A"),
+        'source': getattr(flight.source_airport, 'name', "Unknown") if flight else "Unknown",
+        'destination': getattr(flight.destination_airport, 'name', "Unknown") if flight else "Unknown",
+        'ticket_class': first_ticket.ticket_class,
+        'price_per_ticket': first_ticket.price,
+        'num_seats': tickets.count(),
+        'total_price': tickets.aggregate(total=Sum('price'))['total'] or 0,
+        'booking_reference': first_ticket.booking_reference,  # ✅ Ensure this is set
+    }
+
+    return render(request, 'ticket_details.html', {'ticket': ticket_info})
 
 
 
@@ -114,76 +240,6 @@ def dashboard(request):
     return render(request, 'dashboard.html', {'flights': flights})
 
 
-def buy_ticket(request):
-    airports = Airport.objects.all()
-
-    if request.method == 'POST':
-        source_id = request.POST.get('source')
-        destination_id = request.POST.get('destination')
-        departure_date = request.POST.get('departure_date')  
-        passenger_name = request.POST.get('passenger_name')
-        email = request.POST.get('email')
-        ticket_class = request.POST.get('ticket_class')
-        num_seats = int(request.POST.get('num_seats'))
-
-        if source_id == destination_id:
-            messages.error(request, "Source and destination cannot be the same.")
-            return redirect('buy_ticket')
-
-        flight = Flight.objects.filter(
-            source_airport_id=source_id,  
-            destination_airport_id=destination_id,  
-            date=departure_date
-        ).first()
-
-        if not flight:
-            messages.error(request, "No available flights for the selected route and date.")
-            return redirect('buy_ticket')
-
-        # Determine price per ticket class
-        price_mapping = {
-            "Economy": flight.economy_price,
-            "Business": flight.business_price,
-            "First": flight.first_class_price
-        }
-        price_per_ticket = price_mapping.get(ticket_class, flight.economy_price)
-
-        # Calculate the total price for the number of seats booked
-        total_price = price_per_ticket * num_seats
-
-        # Ensure enough available seats
-        if num_seats > flight.available_seats:
-            messages.error(request, f"Only {flight.available_seats} seat(s) available for this flight.")
-            return redirect('buy_ticket')
-
-        # Deduct the booked seats from available seats
-        flight.available_seats -= num_seats
-        flight.save()
-
-        # Create multiple tickets with the total price divided per seat
-        tickets = [
-            Ticket(
-                flight=flight,
-                passenger_name=passenger_name,
-                email=email,
-                ticket_class=ticket_class,
-                price=price_per_ticket,  # Price per seat
-                booking_reference=uuid.uuid4().hex[:20]
-            ) for _ in range(num_seats)
-        ]
-        Ticket.objects.bulk_create(tickets)
-
-        # Get the first ticket's booking reference to redirect to details page
-        first_ticket_ref = tickets[0].booking_reference
-
-        messages.success(request, f"{num_seats} ticket(s) booked successfully! Total price: ${total_price}")
-
-        # Redirect to the ticket details page
-        return redirect('ticket_details', booking_reference=first_ticket_ref)
-
-    return render(request, 'buy_ticket.html', {'airports': airports})
-
-
 
 def payment_page(request):
     ticket = Ticket.objects.first()  # Fetches the first available ticket
@@ -206,39 +262,6 @@ def payment_page(request):
     }
 
     return render(request, 'payment_page.html', context)
-
-
-
-def ticket_details(request, booking_reference):
-    # Fetch all tickets with the same booking reference (for multiple seats)
-    tickets = Ticket.objects.filter(booking_reference=booking_reference)
-
-    if not tickets.exists():
-        return render(request, 'error.html', {'message': "No ticket found."})
-
-    # Get the first ticket's details (since all share the same booking reference)
-    first_ticket = tickets.first()
-
-    # Calculate total price for all tickets under this booking
-    total_price = sum(ticket.price for ticket in tickets)
-
-    context = {
-        'ticket': {
-            'passenger_name': first_ticket.passenger_name,
-            'email': first_ticket.email,
-            'flight_number': first_ticket.flight.flight_number,
-            'flight_name': first_ticket.flight.flight_name,
-            'source': first_ticket.flight.source_airport.name,
-            'destination': first_ticket.flight.destination_airport.name,
-            'ticket_class': first_ticket.ticket_class,
-            'price_per_ticket': first_ticket.price,  # Single ticket price
-            'num_seats': tickets.count(),  # Count the total seats booked
-            'total_price': total_price,  # Sum of all tickets
-            'booking_reference': first_ticket.booking_reference,
-        }
-    }
-
-    return render(request, 'ticket_details.html', context)
 
 
 def fingerprint_scan(request):
@@ -361,10 +384,3 @@ def search_flights(request):
         # Generic exception handler
         print(f"Unexpected error: {e}")
         return JsonResponse({'message': 'An internal error occurred.'}, status=500)
-
-
-
-def seat_selection(request, flight_id):
-    flight = get_object_or_404(Flight, id=flight_id)
-    seats = flight.seats.all()
-    return render(request, 'seat_selection.html', {'flight': flight, 'seats': seats})

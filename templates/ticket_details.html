@@ -29,11 +29,12 @@
             </div>
 
             <div class="section">
-                <p><strong>Class:</strong> {{ ticket.ticket_class }}</p>
-                <p><strong>Price per Ticket:</strong> ${{ ticket.price_per_ticket }}</p>
-                <p><strong>Number of Seats:</strong> {{ ticket.num_seats }}</p>
-                <p><strong>Total Amount:</strong> <span style="color: blue;">${{ ticket.total_price }}</span></p>
+                <p><strong>Class:</strong> {{ ticket.ticket_class|default:"N/A" }}</p>
+                <p><strong>Price per Ticket:</strong> ${{ ticket.price_per_ticket|default:"0.00" }}</p>
+                <p><strong>Number of Seats:</strong> {{ ticket.num_seats|default:"1" }}</p>
+                <p><strong>Total Amount:</strong> <span style="color: blue;">${{ ticket.total_price|default:"0.00" }}</span></p>
             </div>
+            
 
             <div class="ticket-footer">
                 <p><strong>Booking Reference:</strong> {{ ticket.booking_reference }}</p>
@@ -42,6 +43,11 @@
 
         <div class="continue-button">
             <a href="/fingerprint-scan" class="btn">Continue to Fingerprint Scan</a>
+        </div>
+        <div class="pdf-button-container">
+            <a href="{% url 'generate_ticket_pdf' ticket.booking_reference %}" target="_blank" class="btn pdf-button">
+                Generate Ticket PDF
+            </a>
         </div>
     </div>
 </body>

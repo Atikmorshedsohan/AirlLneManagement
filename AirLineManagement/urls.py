@@ -31,6 +31,7 @@ urlpatterns = [
     path('about_us/', views.about_us, name='about_us'),   
     path('search-flights/', views.search_flights, name='search-flights'),
     path('ticket/<str:booking_reference>/', views.ticket_details, name='ticket_details'),
+    path('generate_ticket_pdf/<str:booking_reference>/', views.generate_ticket_pdf, name='generate_ticket_pdf'),
     path('payment/', views.payment_page, name='payment_page'),
     path('fingerprint-scan/', views.fingerprint_scan, name='fingerprint_scan'),
     

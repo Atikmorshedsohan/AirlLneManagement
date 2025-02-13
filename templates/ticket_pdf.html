@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Flight Ticket</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            padding: 0;
+            background-color: #f4f4f4;
+        }
+        .ticket-container {
+            width: 700px;
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.2);
+            margin: auto;
+        }
+        h2 {
+            text-align: center;
+            color: #333;
+            text-transform: uppercase;
+        }
+        .ticket-info {
+            padding: 15px;
+            border-top: 2px solid #ddd;
+            font-size: 16px;
+        }
+        .ticket-info p {
+            margin: 8px 0;
+        }
+        .bold {
+            font-weight: bold;
+        }
+        .status {
+            text-align: center;
+            font-size: 18px;
+            font-weight: bold;
+            padding: 10px;
+            color: white;
+            border-radius: 5px;
+        }
+        .paid {
+            background-color: green;
+        }
+        .pending {
+            background-color: red;
+        }
+        .footer {
+            text-align: center;
+            font-size: 14px;
+            margin-top: 20px;
+            color: #666;
+        }
+        .pdf-button {
+            display: block;
+            width: 200px;
+            margin: 20px auto;
+            padding: 10px;
+            text-align: center;
+            background-color: #007bff;
+            color: white;
+            text-decoration: none;
+            font-size: 16px;
+            border-radius: 5px;
+        }
+        .pdf-button:hover {
+            background-color: #0056b3;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="ticket-container">
+        <h2>Flight Ticket Confirmation</h2>
+
+        <div class="ticket-info">
+            <p><span class="bold">Passenger Name:</span> {{ ticket.passenger_name }}</p>
+            <p><span class="bold">Email:</span> {{ ticket.email }}</p>
+            <p><span class="bold">Flight Name:</span> {{ ticket.flight.name }}</p>
+            <p><span class="bold">Flight Number:</span> {{ ticket.flight.flight_number }}</p>
+            <p><span class="bold">From:</span> {{ ticket.flight.source_airport.name }}</p>
+            <p><span class="bold">To:</span> {{ ticket.flight.destination_airport.name }}</p>
+            <p><span class="bold">Departure:</span> {{ ticket.flight.departure_time }}</p>
+            <p><span class="bold">Arrival:</span> {{ ticket.flight.arrival_time }}</p>
+            <p><span class="bold">Ticket Class:</span> {{ ticket.ticket_class }}</p>
+            <p><span class="bold">Seat Number:</span> {{ ticket.seat_number }}</p>
+            <p><span class="bold">Price:</span> ${{ ticket.price }}</p>
+            <p><span class="bold">Booking Reference:</span> {{ ticket.booking_reference }}</p>
+
+            {% if ticket.payment_status == "Completed" %}
+                <p class="status paid">Payment Completed</p>
+            {% else %}
+                <p class="status pending">Payment Pending</p>
+            {% endif %}
+        </div>
+
+        <!-- ✅ PDF Download Button -->
+        <a href="{% url 'generate_ticket_pdf' ticket.id %}" class="pdf-button">Download PDF</a>
+
+        <p class="footer">Thank you for booking with us!</p>
+    </div>
+
+</body>
+</html>
