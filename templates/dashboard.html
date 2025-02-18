@@ -13,6 +13,12 @@
     {% include 'header.html' %}
 
     <div class="container">
+        <!-- Button Section (Top Left) -->
+        <div class="button-container">
+            <a href="{% url 'search2' %}" class="action-button">Book Ticket</a>
+           
+        </div>
+
         <!-- Dashboard Title -->
         <h1>Flight Dashboard</h1>
 
@@ -59,6 +65,30 @@
     <footer>
         <p>&copy; 2025 Flight Dashboard. All rights reserved.</p>
     </footer>
+
+    <!-- CSS for Buttons -->
+    <style>
+        .button-container {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .action-button {
+            padding: 10px 15px;
+            background-color: #007bff;
+            color: white;
+            text-decoration: none;
+            border-radius: 5px;
+            font-weight: bold;
+            transition: 0.3s;
+        }
+
+        .action-button:hover {
+            background-color: #0056b3;
+        }
+    </style>
+
 </body>
 
 </html>

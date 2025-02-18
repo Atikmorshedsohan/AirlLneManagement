@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Flight Listings</title>
+    <link rel="stylesheet" href="/static/css/flight_show.css">
+</head>
+<body>
+
+    <!-- Trip Information -->
+    <div class="query-data-div">
+        <div class="container">
+            <div class="trip-places">
+                <div class="from-div text-align-left">
+                    <div class="small-label">From</div>
+                    <div class="white" id="origin">{{ source|default:"Unknown" }}</div>
+                </div>
+                <div class="trip-type-div white">
+                    <div class="small-label">&nbsp;</div>
+                    <svg id="trip-icon" width="1em" height="1em" viewBox="0 0 16 16">
+                        <path fill-rule="evenodd" d="M1 8a.5.5 0 0 1 .5-.5h11.793l-3.147-3.146a.5.5 0 0 1 .708-.708l4 4a.5.5 0 0 1 0 .708l-4 4a.5.5 0 0 1-.708-.708L13.293 8.5H1.5A.5.5 0 0 1 1 8z"/>
+                    </svg>
+                </div>
+                <div class="to-div text-align-right">
+                    <div class="small-label">To</div>
+                    <div class="white" id="destination">{{ destination|default:"Unknown" }}</div>
+                </div>
+            </div>
+
+            <div class="v-line"></div>
+
+            <div class="trip-time">
+                <div class="depart-date-div">
+                    <div class="small-label">Depart</div>
+                    <div class="white" id="depart-date">{{ date|default:"Not Selected" }}</div>
+                </div>
+                <div class="return-date-div">
+                    <div class="small-label">Return</div>
+                    <div class="white" id="return-date">--</div>
+                </div>
+            </div>
+
+            <div class="v-line"></div>
+
+            <div class="trip-class">
+                <div class="return-date-div">
+                    <div class="small-label">Class</div>
+                    <div class="white" id="seat-class">Economy</div>
+                </div>
+            </div>
+        </div>
+    </div>
+<!-- Flight List -->
+    <div class="query-result-div">
+        <div class="actual-result-div">
+            <div id="flights_div2">
+                {% if flights %}
+                    <table class="flight-table">
+                        <thead>
+                            <tr>
+                                <th>Airline</th>
+                                <th>Flight No.</th>
+                                <th>From</th>
+                                <th>To</th>
+                                <th>Date</th>
+                                <th>Departure</th>
+                                <th>Arrival</th>
+                                <th>Duration</th>
+                                <th>Economy ($)</th>
+                                <th>Business ($)</th>
+                                <th>First Class ($)</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for flight in flights %}
+                            <tr>
+                                <td>{{ flight.airline.name }}</td>
+                                <td>{{ flight.flight_number }}</td>
+                                <td>{{ flight.source_airport.city }} ({{ flight.source_airport.code }})</td>
+                                <td>{{ flight.destination_airport.city }} ({{ flight.destination_airport.code }})</td>
+                                <td>{{ flight.date }}</td>
+                                <td>{{ flight.departure_time }}</td>
+                                <td>{{ flight.arrival_time }}</td>
+                                <td>{{ flight.duration }}</td>
+                                <td>${{ flight.economy_price }}</td>
+                                <td>${{ flight.business_price }}</td>
+                                <td>${{ flight.first_class_price }}</td>
+                                <td>
+                                    <a href="{% url 'flight_show' flight.id %}">
+                                        <button class="details-btn">View</button>
+                                    </a>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                {% else %}
+                    <p class="error">No flights found for the selected route and date.</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    
+
+    <!-- JavaScript -->
+    <script>
+        document.addEventListener("DOMContentLoaded", () => {
+            updateTripIcon();
+            displayFlightDuration();
+        });
+
+        function displayFlightDuration() {
+            document.querySelectorAll(".flight-stops .tooltiptext").forEach(element => {
+                let time = element.dataset.value.split(":");
+                if (time.length === 2) {
+                    element.innerText = `${time[0]}h ${time[1]}m`;
+                } else {
+                    element.innerText = "N/A"; 
+                }
+            });
+        }
+    </script>
+
+</body>
+</html>
+
+    <!-- JavaScript -->
+    <script>
+        document.addEventListener("DOMContentLoaded", () => {
+            updateTripIcon();
+            displayFlightDuration();
+        });
+
+        function updateTripIcon() {
+            let tripType = "one-way"; // Can be dynamically updated if needed
+            let tripIcon = document.getElementById("trip-icon");
+
+            if (tripType === "round-trip") {
+                tripIcon.innerHTML = `<path fill-rule="evenodd" d="M1 11.5a.5.5 0 0 0 .5.5h11.793l-3.147 3.146a.5.5 0 0 0 .708.708l4-4a.5.5 0 0 0 0-.708l-4-4a.5.5 0 0 0-.708.708L13.293 11H1.5a.5.5 0 0 0-.5.5zm14-7a.5.5 0 0 1-.5.5H2.707l3.147 3.146a.5.5 0 1 1-.708.708l-4-4a.5.5 0 0 1 0-.708l4-4a.5.5 0 1 1 .708.708L2.707 4H14.5a.5.5 0 0 1 .5.5z"/>`;
+            }
+        }
+
+        function displayFlightDuration() {
+            document.querySelectorAll(".flight-stops .tooltiptext").forEach(element => {
+                let time = element.dataset.value.split(":");
+                if (time.length === 2) {
+                    element.innerText = `${time[0]}h ${time[1]}m`;
+                } else {
+                    element.innerText = "N/A"; 
+                }
+            });
+        }
+    </script>
+
+</body>
+</html>

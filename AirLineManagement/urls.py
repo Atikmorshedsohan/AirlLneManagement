@@ -28,8 +28,13 @@ urlpatterns = [
    # path('ticket-success/<int:flight_id>/<int:num_tickets>/', views.ticket_success, name='ticket_success'),
     path('contact/', views.contact, name='contact'),
     path('contact_success/',views.contact_success,name='contact_success.html'),
-    path('about_us/', views.about_us, name='about_us'),   
+    path('about_us/', views.about_us, name='about_us'), 
+    
+      
     path('search-flights/', views.search_flights, name='search-flights'),
+    path('search2/', views.search2, name='search2'),
+    path('flight/<int:flight_id>/', views.flight_show, name='flight_show'),
+    
     path('ticket/<str:booking_reference>/', views.ticket_details, name='ticket_details'),
     path('generate_ticket_pdf/<str:booking_reference>/', views.generate_ticket_pdf, name='generate_ticket_pdf'),
     path('payment/', views.payment_page, name='payment_page'),

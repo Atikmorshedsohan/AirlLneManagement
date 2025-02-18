@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Flight Search</title>
+    <link rel="stylesheet" href="/static/css/search_2.css">
+</head>
+<body>
+
+    <div class="container">
+        <h1>Search Flights</h1>
+        <form id="searchForm" action="{% url 'search2' %}" method="get">
+            {% csrf_token %}
+            
+            <!-- Source City Input -->
+            <label for="from">From (City):</label>
+            <input type="text" id="from" name="from" required placeholder="Enter source city">
+
+            <!-- Destination City Input -->
+            <label for="to">To (City):</label>
+            <input type="text" id="to" name="to" required placeholder="Enter destination city">
+
+            <!-- Flight Date Input -->
+            <label for="date">Date:</label>
+            <input type="date" id="date" name="date" required>
+
+            <button type="submit">Search</button>
+        </form>
+    </div>
+
+</body>
+</html>

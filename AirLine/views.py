@@ -384,3 +384,57 @@ def search_flights(request):
         # Generic exception handler
         print(f"Unexpected error: {e}")
         return JsonResponse({'message': 'An internal error occurred.'}, status=500)
+
+
+
+def search2(request):
+    if request.method == 'GET' and not request.GET.get('from'):
+        return render(request, 'search2.html')
+
+    source = request.GET.get('from', '').strip()
+    destination = request.GET.get('to', '').strip()
+    date = request.GET.get('date', '').strip()
+
+    if not source or not destination or not date:
+        return JsonResponse({'message': 'Please provide source, destination, and date.'}, status=400)
+
+    try:
+        date = datetime.strptime(date, '%Y-%m-%d').date()
+        flights = Flight.objects.filter(
+            source_airport__city__iexact=source,
+            destination_airport__city__iexact=destination,
+            date=date
+        )
+
+        if not flights.exists():
+            return JsonResponse({'message': 'No flights found for the given source, destination, and date.'}, status=404)
+
+        # Take the first flight found and redirect to the flight_show page
+        first_flight = flights.first()
+        return redirect('flight_show', flight_id=first_flight.id)
+
+    except ValueError:
+        return JsonResponse({'message': 'Invalid date format. Use YYYY-MM-DD.'}, status=400)
+    except Exception as e:
+        print(f"Unexpected error: {e}")
+        return JsonResponse({'message': 'An internal error occurred.'}, status=500)
+
+def flight_show(request, flight_id):
+    """Handles flight ticket booking and displays the selected flight"""
+    flight = get_object_or_404(Flight, id=flight_id)
+
+    # Get values from query parameters (if available)
+    source = request.GET.get('source', flight.source_airport.city)
+    destination = request.GET.get('destination', flight.destination_airport.city)
+    date = request.GET.get('date', flight.date)
+
+    context = {
+        'flights': [flight],
+        'source': source,
+        'destination': destination,
+        'date': date,
+    }
+
+    return render(request, 'flight_show.html', context)
+
+    

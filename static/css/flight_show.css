@@ -1,0 +1,81 @@
+/* Flight Table Styling */
+.flight-table {
+    width: 100%;
+    border-collapse: separate; /* Separate borders for better spacing */
+    border-spacing: 0 10px; /* Add space between rows */
+    background: #fff;
+    border-radius: 8px;
+    overflow: hidden;
+    font-size: 14px;
+}
+
+/* Table Headers */
+.flight-table thead {
+    background-color: #0075ff;
+    color: #fff;
+}
+
+/* Table Cells */
+.flight-table th, .flight-table td {
+    padding: 15px 12px; /* Increased padding */
+    text-align: center;
+    border: 1px solid #ddd;
+}
+
+/* Adjust Column Width for Better Layout */
+.flight-table th:nth-child(1), .flight-table td:nth-child(1) { width: 15%; } /* Airline */
+.flight-table th:nth-child(2), .flight-table td:nth-child(2) { width: 10%; } /* Flight No. */
+.flight-table th:nth-child(3), .flight-table td:nth-child(3),
+.flight-table th:nth-child(4), .flight-table td:nth-child(4) { width: 12%; } /* From & To */
+.flight-table th:nth-child(5), .flight-table td:nth-child(5) { width: 10%; } /* Date */
+.flight-table th:nth-child(6), .flight-table td:nth-child(6),
+.flight-table th:nth-child(7), .flight-table td:nth-child(7) { width: 10%; } /* Departure & Arrival */
+.flight-table th:nth-child(8), .flight-table td:nth-child(8) { width: 8%; } /* Duration */
+.flight-table th:nth-child(9), .flight-table td:nth-child(9),
+.flight-table th:nth-child(10), .flight-table td:nth-child(10),
+.flight-table th:nth-child(11), .flight-table td:nth-child(11) { width: 8%; } /* Prices */
+.flight-table th:nth-child(12), .flight-table td:nth-child(12) { width: 10%; } /* Action */
+
+/* Add Space Between Rows */
+.flight-table tbody tr {
+    background-color: #fff;
+    border-radius: 10px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+.flight-table tbody tr:hover {
+    background-color: #d6e4ff;
+    transition: 0.3s;
+}
+
+/* Button Styles */
+.details-btn {
+    background-color: #0075ff;
+    color: white;
+    border: none;
+    padding: 10px 15px; /* More padding for a better look */
+    cursor: pointer;
+    border-radius: 6px;
+    font-size: 14px;
+    transition: background-color 0.3s;
+}
+
+.details-btn:hover {
+    background-color: #005bb5;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .flight-table {
+        font-size: 12px;
+    }
+
+    .flight-table th, .flight-table td {
+        padding: 10px;
+    }
+
+    .details-btn {
+        font-size: 12px;
+        padding: 8px 10px;
+    }
+}

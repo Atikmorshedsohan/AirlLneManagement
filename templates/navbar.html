@@ -6,6 +6,53 @@
     <title>Bangladesh Airlines</title>
     <link rel="stylesheet" href="/static/css/color.css">
     <script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
+    <style>
+        .popular_destinations {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 20px;
+            padding: 40px 0;
+        }
+        .single_destination {
+            width: 280px;
+            text-align: center;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.2);
+            transition: transform 0.3s ease-in-out;
+            background: #fff;
+        }
+        .single_destination:hover {
+            transform: scale(1.05);
+        }
+        .thumb img {
+            width: 100%;
+            height: auto;
+            border-bottom: 4px solid #00735c;
+        }
+        .content {
+            padding: 15px;
+            font-size: 18px;
+            font-weight: bold;
+            color: #00735c;
+        }
+        .section_title h2 {
+            position: relative;
+            display: inline-block;
+            padding-bottom: 10px;
+        }
+        .section_title h2::after {
+            content: "";
+            width: 60px;
+            height: 4px;
+            background: #10457d;
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+        }
+    </style>
 </head>
 <body>
     <!-- Navbar -->
@@ -17,7 +64,7 @@
         <nav class="nav-links">
             <a href="#home" class="nav-link">Home</a>
             <a href="{% url 'about_us' %}" class="nav-link">About Us</a>
-            <a href="#services" class="nav-link">Services</a>
+            <a href="{% url 'search-flights' %}" class="nav-link">Search</a>
             <a href="{% url 'contact' %}" class="nav-link">Contact</a>
             {% if user.is_authenticated %}
                 <a href="{% url 'logout' %}" class="nav-link">Logout</a>
@@ -25,7 +72,6 @@
                 <a href="{% url 'login' %}" class="nav-link">Login</a>
             {% endif %}
         </nav>
-        
     </header>
 
     <!-- Welcome Section -->
@@ -34,32 +80,72 @@
         <p class="lead">Your one-stop solution for managing flights, bookings, and passengers.</p>
     </div>
 
-    <!-- Flights Information Section -->
-    <section class="info-section py-5">
-        <div class="container text-center">
-            <h2 class="mb-4">Flight Information at a Glance</h2>
-            <div class="row">
-                <!-- Available Flights -->
-                <div class="info-card">
-                    <i class="fas fa-plane"></i>
-                    <h3>50</h3>
-                    <p>Available Flights</p>
+    <!-- Popular Destinations Section -->
+    <section class="section second-section">
+        <div class="container">
+            <div class="row justify-content-center">
+                <div class="col-lg-6">
+                    <div class="section_title text-center mb_70">
+                        <h2>Popular Destinations</h2>
+                    </div>
                 </div>
-                <div class="info-card">
-                    <i class="fas fa-globe"></i>
-                    <h3>23</h3>
-                    <p>International Flights</p>
+            </div>
+            <div class="popular_destinations">
+                <div class="single_destination" onclick="window.location.href = 'https://en.wikipedia.org/wiki/Tourism_in_Italy'">
+                    <div class="thumb">
+                        <img src="/static/picture/destination/1.png" alt="">
+                    </div>
+                    <div class="content">
+                        <a href="#">Italy</a>
+                    </div>
                 </div>
-                <div class="info-card">
-                    <i class="fas fa-map-marker-alt"></i>
-                    <h3>27</h3>
-                    <p>Domestic Flights</p>
+                <div class="single_destination" onclick="window.location.href = 'https://en.wikipedia.org/wiki/Tourism_in_Brazil'">
+                    <div class="thumb">
+                        <img src="/static/picture/destination/2.png" alt="">
+                    </div>
+                    <div class="content">
+                        <a href="#">Brazil</a>
+                    </div>
                 </div>
-                <div class="info-card">
-                    <i class="fas fa-clock"></i>
-                    <h3>85%</h3>
-                    <p>Efficiency</p>
+                <div class="single_destination" onclick="window.location.href = 'https://en.wikipedia.org/wiki/Tourism_in_the_United_States'">
+                    <div class="thumb">
+                        <img src="/static/picture/destination/3.png" alt="">
+                    </div>
+                    <div class="content">
+                        <a href="#">America</a>
+                    </div>
                 </div>
+                <div class="col-lg-4 col-md-6">
+                    <div class="single_destination" onclick="window.location.href = 'https://en.wikipedia.org/wiki/Tourism_in_Nepal'">
+                        <div class="thumb">
+                            <img src="/static/picture/destination/4.png" alt="">
+                        </div>
+                        <div class="content">
+                            <a href="#">Nepal</a>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-4 col-md-6">
+                    <div class="single_destination" onclick="window.location.href = 'https://en.wikipedia.org/wiki/Tourism_in_the_Maldives'">
+                        <div class="thumb">
+                            <img src="/static/picture/destination/5.png" alt="">
+                        </div>
+                        <div class="content">
+                            <a href="#">Maldives</a>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-4 col-md-6">
+                    <div class="single_destination" onclick="window.location.href = 'https://en.wikipedia.org/wiki/Tourism_in_Indonesia'">
+                        <div class="thumb">
+                            <img src="/static/picture/destination/6.png" alt="">
+                        </div>
+                        <div class="content">
+                            <a href="#">Indonesia</a>
+                        </div>
+                    </div>
+                </div>
+                
             </div>
         </div>
     </section>
