@@ -41,10 +41,11 @@
             color: #222;
         }
 
+        /* Small Fingerprint Box */
         .fingerprint-box {
-            width: 100%;
-            height: 150px;
-            margin: 20px 0;
+            width: 80%;
+            height: 80px;
+            margin: 10px auto;
             border: 2px dashed #007BFF;
             border-radius: 10px;
             display: flex;
@@ -54,6 +55,7 @@
             cursor: pointer;
             background-color: rgba(0, 123, 255, 0.1);
             transition: background-color 0.3s ease, border-color 0.3s ease;
+            font-size: 0.9rem;
         }
 
         .fingerprint-box:hover {
@@ -61,15 +63,10 @@
             border-color: #0056b3;
         }
 
-        .fingerprint-box span {
-            font-size: 1rem;
-            color: #007BFF;
-        }
-
         .btn {
             display: inline-block;
             padding: 10px 20px;
-            margin-top: 20px;
+            margin-top: 10px;
             font-size: 1rem;
             color: #fff;
             background-color: #007BFF;
@@ -85,7 +82,52 @@
 
         .button-container {
             text-align: center;
+            margin-top: 10px;
+        }
+
+        /* Ticket Status Section */
+        .ticket-container {
             margin-top: 20px;
+            padding: 20px;
+            border-radius: 10px;
+            background: rgba(240, 240, 240, 0.9);
+        }
+
+        .ticket-container h2 {
+            font-size: 1.2rem;
+            margin-bottom: 10px;
+            color: #444;
+            text-align: center;
+        }
+
+        .ticket-list {
+            list-style: none;
+            padding: 0;
+        }
+
+        .ticket-list li {
+            padding: 10px;
+            background: #fff;
+            border-radius: 8px;
+            margin-bottom: 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+
+        .cancel-btn {
+            background-color: red;
+            color: white;
+            border: none;
+            padding: 5px 10px;
+            cursor: pointer;
+            border-radius: 5px;
+            font-size: 0.9rem;
+        }
+
+        .cancel-btn:hover {
+            background-color: darkred;
         }
 
         @media (max-width: 768px) {
@@ -115,10 +157,30 @@
 
         <!-- Fingerprint Verification Section -->
         <div class="fingerprint-box" onclick="captureFingerprint()">
-            <span>Click or Touch Here to Scan Fingerprint</span>
+            <span>Click to Scan Fingerprint</span>
         </div>
         <div class="fingerprint-box" onclick="confirmFingerprint()">
-            <span>Click or Touch Here to Confirm Fingerprint</span>
+            <span>Click to Confirm Fingerprint</span>
+        </div>
+
+        <!-- Ticket Status -->
+        <div class="ticket-container">
+            <h2>Your Ticket Status</h2>
+            {% if tickets %}
+            <ul class="ticket-list">
+                {% for ticket in tickets %}
+                <li>
+                    <span>
+                        {{ ticket.flight.airline.name }} - {{ ticket.flight.flight_number }} 
+                        ({{ ticket.flight.source_airport.city }} → {{ ticket.flight.destination_airport.city }})
+                    </span>
+                    <button class="cancel-btn" onclick="cancelTicket('{{ ticket.id }}')">Cancel</button>
+                </li>
+                {% endfor %}
+            </ul>
+            {% else %}
+            <p style="text-align:center;">No tickets purchased.</p>
+            {% endif %}
         </div>
 
         <div class="button-container">
@@ -139,6 +201,28 @@
             alert('Confirm fingerprint logic will be implemented here.');
             // Add fingerprint confirmation logic with a JavaScript library or API.
         }
+
+        function cancelTicket(ticketId) {
+    if (confirm("Are you sure you want to cancel this ticket?")) {
+        fetch(`/cancel-ticket/${ticketId}/`, {
+            method: "POST",
+            headers: {
+                "X-CSRFToken": "{{ csrf_token }}",
+                "Content-Type": "application/json",
+            },
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                alert("Ticket canceled successfully.");
+                location.reload();
+            } else {
+                alert("Error canceling ticket.");
+            }
+        })
+        .catch(error => console.error("Error:", error));
+    }
+}
     </script>
 </body>
 </html>
