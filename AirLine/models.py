@@ -56,21 +56,23 @@ class Flight(models.Model):
     source_airport = models.ForeignKey(Airport, related_name="departing_flights", on_delete=models.CASCADE, verbose_name="Source Airport")
     destination_airport = models.ForeignKey(Airport, related_name="arriving_flights", on_delete=models.CASCADE, verbose_name="Destination Airport")
     date = models.DateField(verbose_name="Flight Date")
-    time = models.TimeField(verbose_name="Flight Time")
+    departure_time = models.TimeField(null=True, blank=True, verbose_name="Departure Time")
+    arrival_time = models.TimeField(null=True, blank=True, verbose_name="Arrival Time")
     available_seats = models.PositiveIntegerField(default=50, verbose_name="Available Seats")
     economy_price = models.DecimalField(max_digits=10, decimal_places=2, verbose_name="Economy Class Price")
     business_price = models.DecimalField(max_digits=10, decimal_places=2, verbose_name="Business Class Price")
     first_class_price = models.DecimalField(max_digits=10, decimal_places=2, verbose_name="First Class Price")
     created_at = models.DateTimeField(auto_now_add=True, verbose_name="Created At")
     updated_at = models.DateTimeField(auto_now=True, verbose_name="Last Updated")
-
+    
+    
     def __str__(self):
         return f"{self.flight_number} ({self.source_airport.code} → {self.destination_airport.code})"
 
     class Meta:
         verbose_name = "Flight"
         verbose_name_plural = "Flights"
-        ordering = ['date', 'time']
+        ordering = ['date', 'departure_time']
 
 
 class Ticket(models.Model):

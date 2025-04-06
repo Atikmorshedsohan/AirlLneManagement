@@ -16,6 +16,7 @@ from django.db.models import Q,Sum
 from .forms import PassengerForm
 from .models import Airport, Flight, Registration, ContactMessage, Ticket
 from django.core.mail import send_mail
+from django.conf import settings
 from datetime import datetime
 #For pdf
 
@@ -365,7 +366,7 @@ def search_flights(request):
                 'source': flight.source_airport.name,
                 'destination': flight.destination_airport.name,
                 'date': flight.date.strftime('%Y-%m-%d'),
-                'time': flight.time.strftime('%H:%M'),
+                'arrival_time': flight.time.strftime('%H:%M'),
                 'available_seats': flight.available_seats,
                 'economy_price': float(flight.economy_price),
                 'business_price': float(flight.business_price),

@@ -17,10 +17,10 @@ class AirportAdmin(admin.ModelAdmin):
 
 @admin.register(Flight)
 class FlightAdmin(admin.ModelAdmin):
-    list_display = ('flight_number', 'source_airport', 'destination_airport', 'date', 'time', 'available_seats')
+    list_display = ("flight_number", "flight_name", "source_airport", "destination_airport", "date", "departure_time", "arrival_time")  # Removed 'time'
     list_filter = ('source_airport', 'destination_airport', 'date')
     search_fields = ('flight_number', 'source_airport__name', 'destination_airport__name')
-    ordering = ['date', 'time']
+    ordering = ["date", "departure_time","arrival_time"] 
 
 @admin.register(Ticket)
 class TicketAdmin(admin.ModelAdmin):
