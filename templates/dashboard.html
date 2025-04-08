@@ -47,10 +47,7 @@
                         <td>{{ flight.time }}</td>
                         <td>{{ flight.available_seats }}</td>
                         <td>${{ flight.price }}</td>
-                        <td>
-                            <!-- Link to Buy Ticket -->
-                            <a href="{% url 'buy_ticket' %}" class="buy-button">Buy Ticket</a>
-                        </td>
+                        
                     </tr>
                 {% empty %}
                     <tr>

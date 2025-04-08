@@ -1,67 +1,102 @@
-/* Flight Table Styling */
-.flight-table {
-    width: 100%;
-    border-collapse: separate; /* Separate borders for better spacing */
-    border-spacing: 0 10px; /* Add space between rows */
-    background: #fff;
-    border-radius: 8px;
-    overflow: hidden;
-    font-size: 14px;
+/* General Page Styling */
+body {
+    background-color: #7ef0ee; /* soft sky blue/gray */
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    margin: 0;
+    padding: 20px;
 }
 
-/* Table Headers */
+/* Wrapper Styling */
+.table-wrapper {
+    padding: 20px;
+    background-color: #eaf1f8; /* light sky tone for contrast */
+    border-radius: 10px;
+    box-shadow: 0 0 10px rgba(0, 117, 255, 0.1);
+    max-width: 1200px;
+    margin: auto;
+}
+
+/* General Table Styling */
+.flight-table {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0 10px;
+    background: #fff;
+    border-radius: 8px;
+    font-size: 14px;
+    color: #333;
+}
+
+/* Table Header */
 .flight-table thead {
     background-color: #0075ff;
     color: #fff;
 }
 
 /* Table Cells */
-.flight-table th, .flight-table td {
-    padding: 15px 12px; /* Increased padding */
+.flight-table th,
+.flight-table td {
+    padding: 15px 12px;
     text-align: center;
     border: 1px solid #ddd;
+    vertical-align: middle;
 }
 
-/* Adjust Column Width for Better Layout */
-.flight-table th:nth-child(1), .flight-table td:nth-child(1) { width: 15%; } /* Airline */
-.flight-table th:nth-child(2), .flight-table td:nth-child(2) { width: 10%; } /* Flight No. */
-.flight-table th:nth-child(3), .flight-table td:nth-child(3),
-.flight-table th:nth-child(4), .flight-table td:nth-child(4) { width: 12%; } /* From & To */
-.flight-table th:nth-child(5), .flight-table td:nth-child(5) { width: 10%; } /* Date */
-.flight-table th:nth-child(6), .flight-table td:nth-child(6),
-.flight-table th:nth-child(7), .flight-table td:nth-child(7) { width: 10%; } /* Departure & Arrival */
-.flight-table th:nth-child(8), .flight-table td:nth-child(8) { width: 8%; } /* Duration */
+/* Column Widths (adjusted for 11 columns) */
+.flight-table th:nth-child(1), .flight-table td:nth-child(1) { width: 10%; }  /* Flight No. */
+.flight-table th:nth-child(2), .flight-table td:nth-child(2),
+.flight-table th:nth-child(3), .flight-table td:nth-child(3) { width: 12%; } /* From, To */
+.flight-table th:nth-child(4), .flight-table td:nth-child(4) { width: 12%; } /* Date */
+.flight-table th:nth-child(5), .flight-table td:nth-child(5),
+.flight-table th:nth-child(6), .flight-table td:nth-child(6) { width: 10%; } /* Departure, Arrival */
+.flight-table th:nth-child(7), .flight-table td:nth-child(7) { width: 10%; }  /* Duration */
+.flight-table th:nth-child(8), .flight-table td:nth-child(8),
 .flight-table th:nth-child(9), .flight-table td:nth-child(9),
-.flight-table th:nth-child(10), .flight-table td:nth-child(10),
-.flight-table th:nth-child(11), .flight-table td:nth-child(11) { width: 8%; } /* Prices */
-.flight-table th:nth-child(12), .flight-table td:nth-child(12) { width: 10%; } /* Action */
+.flight-table th:nth-child(10), .flight-table td:nth-child(10) { width: 8%; }  /* Prices */
+.flight-table th:nth-child(11), .flight-table td:nth-child(11) { width: 10%; } /* Action */
 
-/* Add Space Between Rows */
+/* Row Styling */
 .flight-table tbody tr {
+    min-height: 60px;
+    height: auto;
     background-color: #fff;
     border-radius: 10px;
-    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+    transition: background-color 0.3s;
 }
 
+/* Hover Row Effect */
 .flight-table tbody tr:hover {
-    background-color: #d6e4ff;
-    transition: 0.3s;
+    background-color: #5a9dd4;
 }
 
-/* Button Styles */
+/* Adjust Button to Fit */
 .details-btn {
+    display: inline-block;
     background-color: #0075ff;
-    color: white;
+    color: rgb(249, 245, 245);
     border: none;
-    padding: 10px 15px; /* More padding for a better look */
+    padding: 10px 15px;
     cursor: pointer;
     border-radius: 6px;
     font-size: 14px;
+    text-decoration: none;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 100%;
+    box-sizing: border-box;
     transition: background-color 0.3s;
 }
 
 .details-btn:hover {
-    background-color: #005bb5;
+    background-color: #0066cc;
+}
+
+/* Prevent Overflow in Action Column */
+.flight-table td:last-child {
+    max-width: 110px;
+    overflow: hidden;
 }
 
 /* Responsive Design */
@@ -70,7 +105,8 @@
         font-size: 12px;
     }
 
-    .flight-table th, .flight-table td {
+    .flight-table th,
+    .flight-table td {
         padding: 10px;
     }
 

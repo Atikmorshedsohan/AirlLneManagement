@@ -13,30 +13,52 @@
         <form id="ticket-form" method="POST">
             {% csrf_token %}
 
+            <!-- Hidden flight_id input -->
+            <input type="hidden" name="flight_id" value="{{ flight_id }}">
+
+            <!-- Optional hidden inputs if you disable the dropdowns -->
+            <input type="hidden" name="source" value="{{ prefilled_source }}">
+            <input type="hidden" name="destination" value="{{ prefilled_destination }}">
+
             <div class="form-group">
                 <label for="source">Source:</label>
-                <select id="source" name="source" required>
+                <select id="source" name="source" required disabled>
                     <option value="">Select Source</option>
                     {% for airport in airports %}
-                        <option value="{{ airport.id }}">{{ airport.name }}</option>
+                        <option value="{{ airport.id }}"
+                            {% if prefilled_source == airport.id %}selected{% endif %}>
+                            {{ airport.name }}
+                        </option>
                     {% endfor %}
                 </select>
             </div>
 
             <div class="form-group">
                 <label for="destination">Destination:</label>
-                <select id="destination" name="destination" required>
+                <select id="destination" name="destination" required disabled>
                     <option value="">Select Destination</option>
                     {% for airport in airports %}
-                        <option value="{{ airport.id }}">{{ airport.name }}</option>
+                        <option value="{{ airport.id }}"
+                            {% if prefilled_destination == airport.id %}selected{% endif %}>
+                            {{ airport.name }}
+                        </option>
                     {% endfor %}
                 </select>
             </div>
 
             <div class="form-group">
                 <label for="departure_date">Departure Date:</label>
-                <input type="date" id="departure_date" name="departure_date" required>
+                <select id="departure_date" name="departure_date" required>
+                    <option value="">Select Date</option>
+                    {% for date in available_dates %}
+                        <option value="{{ date }}" {% if prefilled_date == date %}selected{% endif %}>
+                            {{ date }}
+                        </option>
+                    {% endfor %}
+                </select>
             </div>
+            
+            
 
             <div class="form-group">
                 <label for="passenger_name">Passenger Name:</label>

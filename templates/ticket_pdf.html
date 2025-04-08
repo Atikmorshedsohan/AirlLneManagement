@@ -80,7 +80,13 @@
         <div class="ticket-info">
             <p><span class="bold">Passenger Name:</span> {{ ticket.passenger_name }}</p>
             <p><span class="bold">Email:</span> {{ ticket.email }}</p>
-            <p><span class="bold">Flight Name:</span> {{ ticket.flight.name }}</p>
+
+            {% if ticket.flight.flight_name %}
+                <p><span class="bold">Flight Name:</span> {{ ticket.flight.flight_name }}</p>
+            {% else %}
+                <p><span class="bold">Flight:</span> {{ ticket.flight }}</p>
+            {% endif %}
+
             <p><span class="bold">Flight Number:</span> {{ ticket.flight.flight_number }}</p>
             <p><span class="bold">From:</span> {{ ticket.flight.source_airport.name }}</p>
             <p><span class="bold">To:</span> {{ ticket.flight.destination_airport.name }}</p>
@@ -97,9 +103,6 @@
                 <p class="status pending">Payment Pending</p>
             {% endif %}
         </div>
-
-        <!-- ✅ PDF Download Button -->
-        <a href="{% url 'generate_ticket_pdf' ticket.id %}" class="pdf-button">Download PDF</a>
 
         <p class="footer">Thank you for booking with us!</p>
     </div>

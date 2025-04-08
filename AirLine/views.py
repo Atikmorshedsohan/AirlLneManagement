@@ -50,71 +50,6 @@ def generate_ticket_pdf(request, booking_reference):
     return response
 
 
-def buy_ticket(request):
-    airports = Airport.objects.all()
-
-    if request.method == 'POST':
-        source_id = request.POST.get('source')
-        destination_id = request.POST.get('destination')
-        departure_date = request.POST.get('departure_date')
-        passenger_name = request.POST.get('passenger_name')
-        email = request.POST.get('email')
-        ticket_class = request.POST.get('ticket_class')
-        num_seats = int(request.POST.get('num_seats'))
-
-        if source_id == destination_id:
-            messages.error(request, "Source and destination cannot be the same.")
-            return redirect('buy_ticket')
-
-        flight = Flight.objects.filter(
-            source_airport_id=source_id,
-            destination_airport_id=destination_id,
-            date=departure_date
-        ).first()
-
-        if not flight:
-            messages.error(request, "No available flights for the selected route and date.")
-            return redirect('buy_ticket')
-
-        price_mapping = {
-            "Economy": flight.economy_price,
-            "Business": flight.business_price,
-            "First": flight.first_class_price
-        }
-        price_per_ticket = price_mapping.get(ticket_class, flight.economy_price)
-
-        # ✅ Calculate total price here instead of importing total_price
-        total_price_value = price_per_ticket * num_seats  
-
-        if num_seats > flight.available_seats:
-            messages.error(request, f"Only {flight.available_seats} seat(s) available for this flight.")
-            return redirect('buy_ticket')
-
-        flight.available_seats -= num_seats
-        flight.save()
-
-        # ✅ Generate a shared booking reference for all tickets in this booking
-        shared_booking_reference = uuid.uuid4().hex[:20]
-
-        tickets = []
-        for _ in range(num_seats):
-            ticket = Ticket(
-                flight=flight,
-                passenger_name=passenger_name,
-                email=email,
-                ticket_class=ticket_class,
-                price=total_price_value,
-                booking_reference=shared_booking_reference,  # Shared reference for all tickets
-            )
-            ticket.save()  # Save individually to assign unique seat_number
-            tickets.append(ticket)
-
-        return redirect('ticket_details', booking_reference=shared_booking_reference)
-
-    return render(request, 'buy_ticket.html', {'airports': airports})
-
-
-
 
 def ticket_details(request, booking_reference):
     tickets = Ticket.objects.filter(booking_reference=booking_reference).select_related('flight')
@@ -410,15 +345,103 @@ def search2(request):
         if not flights.exists():
             return JsonResponse({'message': 'No flights found for the given source, destination, and date.'}, status=404)
 
-        # Take the first flight found and redirect to the flight_show page
-        first_flight = flights.first()
-        return redirect('flight_show', flight_id=first_flight.id)
+        # Instead of redirecting, render a template and pass all flights
+        return render(request, 'flight_show.html', {'flights': flights})
 
     except ValueError:
         return JsonResponse({'message': 'Invalid date format. Use YYYY-MM-DD.'}, status=400)
     except Exception as e:
         print(f"Unexpected error: {e}")
         return JsonResponse({'message': 'An internal error occurred.'}, status=500)
+
+
+
+
+def buy_ticket(request):
+    airports = Airport.objects.all()
+
+    # Handle POST request
+    if request.method == 'POST':
+        flight_id = request.POST.get('flight_id')
+        flight = get_object_or_404(Flight, id=flight_id)
+
+        source_id = flight.source_airport.id
+        destination_id = flight.destination_airport.id
+        departure_date = request.POST.get('departure_date')  # Get the date from the form submission
+
+        # You can also use `flight.date` if you want to ensure the date is exactly what you expect
+        # But since we're getting the date from the form, this is enough.
+
+        passenger_name = request.POST.get('passenger_name')
+        email = request.POST.get('email')
+        ticket_class = request.POST.get('ticket_class')
+        num_seats = int(request.POST.get('num_seats'))
+
+        if source_id == destination_id:
+            messages.error(request, "Source and destination cannot be the same.")
+            return redirect('buy_ticket')
+
+        if num_seats > flight.available_seats:
+            messages.error(request, f"Only {flight.available_seats} seat(s) available for this flight.")
+            return redirect('buy_ticket')
+
+        price_mapping = {
+            "Economy": flight.economy_price,
+            "Business": flight.business_price,
+            "First": flight.first_class_price
+        }
+        price_per_ticket = price_mapping.get(ticket_class, flight.economy_price)
+        total_price_value = price_per_ticket * num_seats
+
+        flight.available_seats -= num_seats
+        flight.save()
+
+        shared_booking_reference = uuid.uuid4().hex[:20]
+
+        tickets = []
+        for _ in range(num_seats):
+            ticket = Ticket(
+                flight=flight,
+                passenger_name=passenger_name,
+                email=email,
+                ticket_class=ticket_class,
+                price=total_price_value,
+                booking_reference=shared_booking_reference,
+            )
+            ticket.save()
+            tickets.append(ticket)
+
+        return redirect('ticket_details', booking_reference=shared_booking_reference)
+
+    # Handle GET request to show the flight details and available dates
+    flight_id = request.GET.get('flight_id')
+    flight = Flight.objects.get(id=flight_id) if flight_id else None
+
+    # Fetch all available dates for the selected flight (example query)
+    available_dates = Flight.objects.filter(
+        source_airport=flight.source_airport,
+        destination_airport=flight.destination_airport
+    ).values_list('date', flat=True).distinct()
+
+    context = {
+        'airports': airports,
+        'flight_id': flight_id,
+        'prefilled_source': flight.source_airport.id if flight else '',
+        'prefilled_destination': flight.destination_airport.id if flight else '',
+        'prefilled_date': flight.date if flight else '',
+        'available_dates': available_dates,
+    }
+
+    return render(request, 'buy_ticket.html', context)
+
+
+
+
+
+
+
+
+
 
 def flight_show(request, flight_id):
     """Handles flight ticket booking and displays the selected flight"""
